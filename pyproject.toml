@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scitex-capture"
+version = "0.1.0"
+description = "Session-based screen capture (single screenshots, multi-frame GIFs, grid overlays, monitor info) — standalone module from the SciTeX ecosystem"
+readme = "README.md"
+license = "AGPL-3.0-only"
+requires-python = ">=3.9"
+authors = [{name = "Yusuke Watanabe", email = "ywatanabe@scitex.ai"}]
+keywords = ["scitex", "capture", "screenshot", "screencast", "gif", "wsl"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Graphics :: Capture :: Screen Capture",
+]
+dependencies = [
+    "Pillow",
+    "mss",
+]
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.0.0"]
+playwright = ["playwright>=1.40.0"]
+dev = ["pytest", "pytest-cov", "ruff"]
+docs = [
+    "sphinx>=7.0",
+    "sphinx-rtd-theme>=2.0",
+    "myst-parser>=2.0",
+    "sphinx-copybutton>=0.5",
+    "sphinx-autodoc-typehints>=1.25",
+]
+all = ["scitex-capture[mcp,playwright,dev,docs]"]
+
+[project.urls]
+Homepage = "https://github.com/ywatanabe1989/scitex-capture"
+Repository = "https://github.com/ywatanabe1989/scitex-capture"
+Documentation = "https://scitex-capture.readthedocs.io"
+
+[project.scripts]
+scitex-capture = "scitex_capture.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+scitex_capture = ["powershell/*.ps1", "powershell/*.bat"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["--disable-warnings"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I"]
+ignore = ["E501"]
