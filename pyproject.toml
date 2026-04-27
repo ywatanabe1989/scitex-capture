@@ -23,9 +23,17 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-mcp = ["mcp>=1.0.0"]
-playwright = ["playwright>=1.40.0"]
-dev = ["pytest", "pytest-cov", "ruff"]
+mcp = [
+    "mcp>=1.0.0",
+]
+playwright = [
+    "playwright>=1.40.0",
+]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+]
 docs = [
     "sphinx>=7.0",
     "sphinx-rtd-theme>=2.0",
@@ -33,7 +41,10 @@ docs = [
     "sphinx-copybutton>=0.5",
     "sphinx-autodoc-typehints>=1.25",
 ]
-all = ["scitex-capture[mcp,playwright,dev,docs]"]
+all = [
+    "scitex-capture[mcp]",
+    "scitex-capture[playwright]",
+]
 
 [project.urls]
 Homepage = "https://github.com/ywatanabe1989/scitex-capture"
