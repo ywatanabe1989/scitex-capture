@@ -30,6 +30,7 @@ playwright = [
     "playwright>=1.40.0",
 ]
 dev = [
+    "numpy",
     "pytest",
     "pytest-cov",
     "ruff",
