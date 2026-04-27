@@ -44,7 +44,7 @@ class TestModuleExecution:
     def test_module_runnable_with_help(self):
         """Test module can be run with python -m and --help."""
         result = subprocess.run(
-            [sys.executable, "-m", "scitex.capture", "--help"],
+            [sys.executable, "-m", "scitex_capture", "--help"],
             capture_output=True,
             text=True,
             timeout=10,
@@ -69,7 +69,7 @@ class TestModuleExecution:
         """Test module passes main's return value to sys.exit."""
         # Test by running actual subprocess with mocked capture
         result = subprocess.run(
-            [sys.executable, "-m", "scitex.capture", "--stop"],
+            [sys.executable, "-m", "scitex_capture", "--stop"],
             capture_output=True,
             text=True,
             timeout=10,
@@ -85,7 +85,7 @@ class TestModuleIntegration:
     def test_help_output_contains_capture_commands(self):
         """Test help output contains expected capture commands."""
         result = subprocess.run(
-            [sys.executable, "-m", "scitex.capture", "--help"],
+            [sys.executable, "-m", "scitex_capture", "--help"],
             capture_output=True,
             text=True,
             timeout=10,
@@ -102,7 +102,7 @@ class TestModuleIntegration:
             mock_info.return_value = {"Windows": {"Details": []}}
 
             result = subprocess.run(
-                [sys.executable, "-m", "scitex.capture", "--list"],
+                [sys.executable, "-m", "scitex_capture", "--list"],
                 capture_output=True,
                 text=True,
                 timeout=10,
@@ -114,7 +114,7 @@ class TestModuleIntegration:
     def test_info_action_via_module(self):
         """Test --info action works via module."""
         result = subprocess.run(
-            [sys.executable, "-m", "scitex.capture", "--info"],
+            [sys.executable, "-m", "scitex_capture", "--info"],
             capture_output=True,
             text=True,
             timeout=10,
