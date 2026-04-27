@@ -32,6 +32,7 @@ playwright = [
 dev = [
     "numpy",
     "pytest",
+    "pytest-asyncio",
     "pytest-cov",
     "ruff",
 ]
