@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scitex-capture"
-version = "0.1.0"
+version = "0.1.1"
 description = "Session-based screen capture (single screenshots, multi-frame GIFs, grid overlays, monitor info) — standalone module from the SciTeX ecosystem"
 readme = "README.md"
 license = "AGPL-3.0-only"
@@ -61,7 +61,10 @@ scitex-capture = "scitex_capture.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-scitex_capture = ["powershell/*.ps1", "powershell/*.bat"]
+scitex_capture = ["_skills/**/*.md", "powershell/*.ps1", "powershell/*.bat"]
+
+[project.entry-points."scitex_dev.skills"]
+scitex-capture = "scitex_capture"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
