@@ -35,6 +35,8 @@ Usage:
     capture.stop()
 """
 
+from __future__ import annotations
+
 from .capture import CaptureManager as _CaptureManager  # Internal class
 from .gif import (
     create_gif_from_files,
@@ -98,6 +100,7 @@ __email__ = "Yusuke.Watanabe@scitex.ai"
 
 # Only expose the essential functions
 __all__ = [
+    "__version__",
     "capture",
     "snap",  # Primary API
     "take",  # Alternative API
