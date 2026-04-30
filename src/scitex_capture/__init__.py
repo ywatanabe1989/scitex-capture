@@ -1,15 +1,6 @@
 #!/usr/bin/env python3
 """scitex-capture — AI's Camera (standalone screen-capture for WSL + Windows).
 
-try:
-    from importlib.metadata import version as _v, PackageNotFoundError
-    try:
-        __version__ = _v("scitex-capture")
-    except PackageNotFoundError:
-        __version__ = "0.0.0+local"
-    del _v, PackageNotFoundError
-except ImportError:  # pragma: no cover — only on ancient Pythons
-    __version__ = "0.0.0+local"
 A lightweight, intuitive screen capture library optimized for WSL and Windows.
 
 Features:
@@ -36,6 +27,18 @@ Usage:
 """
 
 from __future__ import annotations
+
+try:
+    from importlib.metadata import PackageNotFoundError
+    from importlib.metadata import version as _v
+
+    try:
+        __version__ = _v("scitex-capture")
+    except PackageNotFoundError:
+        __version__ = "0.0.0+local"
+    del _v, PackageNotFoundError
+except ImportError:  # pragma: no cover — only on ancient Pythons
+    __version__ = "0.0.0+local"
 
 from .capture import CaptureManager as _CaptureManager  # Internal class
 from .gif import (
