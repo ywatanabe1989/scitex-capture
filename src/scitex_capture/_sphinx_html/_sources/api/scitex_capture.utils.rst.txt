@@ -1,0 +1,15 @@
+scitex\_capture.utils
+=====================
+
+.. automodule:: scitex_capture.utils
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      capture
+      start_monitor
+      stop_monitor
+      take_screenshot
+   

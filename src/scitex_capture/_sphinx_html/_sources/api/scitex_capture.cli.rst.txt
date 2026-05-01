@@ -1,0 +1,12 @@
+scitex\_capture.cli
+===================
+
+.. automodule:: scitex_capture.cli
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      main
+   

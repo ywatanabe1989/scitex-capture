@@ -1,0 +1,28 @@
+﻿scitex\_capture
+===============
+
+.. automodule:: scitex_capture
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      capture_window
+      get_display_info
+      get_info
+      list_windows
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   capture
+   cli
+   gif
+   grid
+   mcp_server
+   session
+   utils

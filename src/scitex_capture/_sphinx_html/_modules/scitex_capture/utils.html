@@ -1,0 +1,791 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scitex_capture.utils &mdash; scitex-capture 0.1.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=92734c54"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            scitex-capture
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/scitex_capture.html">scitex_capture</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">scitex-capture</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../scitex_capture.html">scitex_capture</a></li>
+      <li class="breadcrumb-item active">scitex_capture.utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scitex_capture.utils</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># Timestamp: &quot;2025-10-18 09:55:52 (ywatanabe)&quot;</span>
+<span class="c1"># File: /home/ywatanabe/proj/scitex-code/src/scitex/capture/utils.py</span>
+<span class="c1"># ----------------------------------------</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">__FILE__</span> <span class="o">=</span> <span class="s2">&quot;./src/scitex/capture/utils.py&quot;</span>
+<span class="n">__DIR__</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__FILE__</span><span class="p">)</span>
+<span class="c1"># ----------------------------------------</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Utility functions for easy screen capture.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.capture</span><span class="w"> </span><span class="kn">import</span> <span class="n">CaptureManager</span><span class="p">,</span> <span class="n">ScreenshotWorker</span>
+
+<span class="c1"># Global manager instance</span>
+<span class="n">_manager</span> <span class="o">=</span> <span class="n">CaptureManager</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_manage_cache_size</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">max_size_gb</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Manage cache directory size by removing old files if size exceeds limit.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cache_dir : Path</span>
+<span class="sd">        Directory to manage</span>
+<span class="sd">    max_size_gb : float</span>
+<span class="sd">        Maximum size in GB (default: 1.0)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cache_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span>
+
+    <span class="n">max_size_bytes</span> <span class="o">=</span> <span class="n">max_size_gb</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span>  <span class="c1"># Convert GB to bytes</span>
+
+    <span class="c1"># Get all files with their sizes and modification times</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">total_size</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">cache_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.jpg&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">file_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span>
+            <span class="n">mtime</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span>
+            <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">file_path</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">mtime</span><span class="p">))</span>
+            <span class="n">total_size</span> <span class="o">+=</span> <span class="n">size</span>
+
+    <span class="c1"># Also check PNG files</span>
+    <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">cache_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.png&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">file_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span>
+            <span class="n">mtime</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span>
+            <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">file_path</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">mtime</span><span class="p">))</span>
+            <span class="n">total_size</span> <span class="o">+=</span> <span class="n">size</span>
+
+    <span class="c1"># If under limit, nothing to do</span>
+    <span class="k">if</span> <span class="n">total_size</span> <span class="o">&lt;=</span> <span class="n">max_size_bytes</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Sort by modification time (oldest first)</span>
+    <span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="c1"># Remove oldest files until under limit</span>
+    <span class="k">for</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">total_size</span> <span class="o">&lt;=</span> <span class="n">max_size_bytes</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">file_path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+            <span class="n">total_size</span> <span class="o">-=</span> <span class="n">size</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>  <span class="c1"># File might be in use</span>
+
+
+<div class="viewcode-block" id="capture">
+<a class="viewcode-back" href="../../api/scitex_capture.utils.html#scitex_capture.capture">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">capture</span><span class="p">(</span>
+    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">quality</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">85</span><span class="p">,</span>
+    <span class="n">auto_categorize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">monitor_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">capture_all</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="nb">all</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">app</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">url_wait</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">url_width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1920</span><span class="p">,</span>
+    <span class="n">url_height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1080</span><span class="p">,</span>
+    <span class="n">max_cache_gb</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Take a screenshot - monitor, window, browser, or everything.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    message : str, optional</span>
+<span class="sd">        Message to include in filename</span>
+<span class="sd">    path : str, optional</span>
+<span class="sd">        Output path (default: ~/.scitex/capture/)</span>
+<span class="sd">    quality : int</span>
+<span class="sd">        JPEG quality (1-100)</span>
+<span class="sd">    all : bool</span>
+<span class="sd">        Capture all monitors</span>
+<span class="sd">    app : str, optional</span>
+<span class="sd">        App name to capture (e.g., &quot;chrome&quot;, &quot;code&quot;)</span>
+<span class="sd">    url : str, optional</span>
+<span class="sd">        URL to capture via browser (e.g., &quot;http://127.0.0.1:8000/&quot;)</span>
+<span class="sd">    url_wait : int</span>
+<span class="sd">        Seconds to wait for page load (default: 3)</span>
+<span class="sd">    url_width : int</span>
+<span class="sd">        Browser window width for URL capture (default: 1920)</span>
+<span class="sd">    url_height : int</span>
+<span class="sd">        Browser window height for URL capture (default: 1080)</span>
+<span class="sd">    monitor_id : int</span>
+<span class="sd">        Monitor to capture (0-based, default: 0)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        Path to saved screenshot</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from scitex import capture</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; capture.snap()                           # Current monitor</span>
+<span class="sd">    &gt;&gt;&gt; capture.snap(all=True)                   # All monitors</span>
+<span class="sd">    &gt;&gt;&gt; capture.snap(app=&quot;chrome&quot;)               # Chrome window</span>
+<span class="sd">    &gt;&gt;&gt; capture.snap(url=&quot;http://localhost:8000&quot;) # Browser page</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Handle URL capture</span>
+    <span class="k">if</span> <span class="n">url</span><span class="p">:</span>
+        <span class="c1"># Auto-add http:// if no protocol specified</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">&quot;http://&quot;</span><span class="p">,</span> <span class="s2">&quot;https://&quot;</span><span class="p">,</span> <span class="s2">&quot;file://&quot;</span><span class="p">)):</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;http://</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Try Playwright first (headless, non-interfering)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">playwright.sync_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">sync_playwright</span>
+
+            <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">timestamp_str</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S&quot;</span><span class="p">)</span>
+                <span class="n">url_slug</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;://&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)[:</span><span class="mi">30</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;~/.scitex/capture/</span><span class="si">{</span><span class="n">timestamp_str</span><span class="si">}</span><span class="s2">-url-</span><span class="si">{</span><span class="n">url_slug</span><span class="si">}</span><span class="s2">.jpg&quot;</span>
+
+            <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📸 Capturing URL: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Check if DISPLAY is set (WSL with X11 forward causes visible browser)</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_os</span>
+
+            <span class="n">original_display</span> <span class="o">=</span> <span class="n">_os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;DISPLAY&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Force headless by unsetting DISPLAY temporarily</span>
+            <span class="k">if</span> <span class="n">original_display</span><span class="p">:</span>
+                <span class="n">_os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;DISPLAY&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">sync_playwright</span><span class="p">()</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+                    <span class="c1"># Use stealth args from scitex.browser</span>
+                    <span class="n">stealth_args</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="s2">&quot;--no-sandbox&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;--disable-dev-shm-usage&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;--disable-blink-features=AutomationControlled&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;--window-size=1920,1080&quot;</span><span class="p">,</span>
+                    <span class="p">]</span>
+                    <span class="n">browser</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">chromium</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="n">headless</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">stealth_args</span><span class="p">)</span>
+                    <span class="n">context</span> <span class="o">=</span> <span class="n">browser</span><span class="o">.</span><span class="n">new_context</span><span class="p">(</span>
+                        <span class="n">viewport</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="n">url_width</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">url_height</span><span class="p">}</span>
+                    <span class="p">)</span>
+                    <span class="n">page</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">new_page</span><span class="p">()</span>
+                    <span class="c1"># Use domcontentloaded for faster capture, with longer timeout</span>
+                    <span class="n">page</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">wait_until</span><span class="o">=</span><span class="s2">&quot;domcontentloaded&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30000</span><span class="p">)</span>
+                    <span class="c1"># Wait additional time for rendering</span>
+                    <span class="n">page</span><span class="o">.</span><span class="n">wait_for_timeout</span><span class="p">(</span><span class="n">url_wait</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+                    <span class="n">page</span><span class="o">.</span><span class="n">screenshot</span><span class="p">(</span>
+                        <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;jpeg&quot;</span><span class="p">,</span>
+                        <span class="n">quality</span><span class="o">=</span><span class="n">quality</span><span class="p">,</span>
+                        <span class="n">full_page</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">browser</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="c1"># Restore DISPLAY</span>
+                <span class="k">if</span> <span class="n">original_display</span><span class="p">:</span>
+                    <span class="n">_os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;DISPLAY&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original_display</span>
+
+            <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📸 URL: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">path</span>
+
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;⚠️  Playwright not installed: pip install &#39;scitex[capture-browser]&#39;&quot;</span>
+                <span class="p">)</span>
+            <span class="k">pass</span>  <span class="c1"># Try PowerShell fallback</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⚠️  Playwright failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">pass</span>  <span class="c1"># Try PowerShell fallback</span>
+
+        <span class="c1"># For WSL: Fallback to Windows-side browser</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;linux&quot;</span> <span class="ow">and</span> <span class="s2">&quot;microsoft&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()</span><span class="o">.</span><span class="n">release</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+
+                <span class="c1"># Generate output path</span>
+                <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">timestamp_str</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S&quot;</span><span class="p">)</span>
+                    <span class="n">url_slug</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;://&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)[:</span><span class="mi">30</span><span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;~/.scitex/capture/</span><span class="si">{</span><span class="n">timestamp_str</span><span class="si">}</span><span class="s2">-url-</span><span class="si">{</span><span class="n">url_slug</span><span class="si">}</span><span class="s2">.jpg&quot;</span>
+
+                <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📸 Capturing URL on Windows: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Use PowerShell script on Windows host</span>
+                <span class="n">script_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;powershell&quot;</span>
+                <span class="n">script_path</span> <span class="o">=</span> <span class="n">script_dir</span> <span class="o">/</span> <span class="s2">&quot;capture_url.ps1&quot;</span>
+
+                <span class="k">if</span> <span class="n">script_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="c1"># Find PowerShell</span>
+                    <span class="n">ps_paths</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="s2">&quot;powershell.exe&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe&quot;</span><span class="p">,</span>
+                    <span class="p">]</span>
+                    <span class="n">ps_exe</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ps_paths</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                                <span class="p">[</span><span class="n">p</span><span class="p">,</span> <span class="s2">&quot;-Command&quot;</span><span class="p">,</span> <span class="s2">&quot;echo test&quot;</span><span class="p">],</span>
+                                <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                            <span class="p">)</span>
+                            <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">ps_exe</span> <span class="o">=</span> <span class="n">p</span>
+                                <span class="k">break</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">continue</span>
+
+                    <span class="k">if</span> <span class="n">ps_exe</span><span class="p">:</span>
+                        <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">ps_exe</span><span class="p">,</span>
+                            <span class="s2">&quot;-NoProfile&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;-ExecutionPolicy&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;Bypass&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;-File&quot;</span><span class="p">,</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">script_path</span><span class="p">),</span>
+                            <span class="s2">&quot;-Url&quot;</span><span class="p">,</span>
+                            <span class="n">url</span><span class="p">,</span>
+                            <span class="s2">&quot;-WaitSeconds&quot;</span><span class="p">,</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">url_wait</span><span class="p">),</span>
+                            <span class="s2">&quot;-WindowWidth&quot;</span><span class="p">,</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">url_width</span><span class="p">),</span>
+                            <span class="s2">&quot;-WindowHeight&quot;</span><span class="p">,</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">url_height</span><span class="p">),</span>
+                        <span class="p">]</span>
+
+                        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                            <span class="n">cmd</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span>
+                        <span class="p">)</span>
+
+                        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+                            <span class="c1"># Parse JSON</span>
+                            <span class="n">lines</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">):</span>
+                                    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Success&quot;</span><span class="p">):</span>
+                                        <span class="n">img_data</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span>
+                                            <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Base64Data&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                                        <span class="p">)</span>
+
+                                        <span class="c1"># Save as JPEG</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+
+                                            <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
+
+                                            <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">img_data</span><span class="p">))</span>
+                                            <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;RGBA&quot;</span><span class="p">:</span>
+                                                <span class="n">rgb_img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+                                                    <span class="s2">&quot;RGB&quot;</span><span class="p">,</span>
+                                                    <span class="n">img</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
+                                                    <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+                                                <span class="p">)</span>
+                                                <span class="n">rgb_img</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">img</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">3</span><span class="p">])</span>
+                                                <span class="n">img</span> <span class="o">=</span> <span class="n">rgb_img</span>
+                                            <span class="n">img</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+                                                <span class="n">path</span><span class="p">,</span>
+                                                <span class="s2">&quot;JPEG&quot;</span><span class="p">,</span>
+                                                <span class="n">quality</span><span class="o">=</span><span class="n">quality</span><span class="p">,</span>
+                                                <span class="n">optimize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                            <span class="p">)</span>
+
+                                            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📸 URL: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                            <span class="k">return</span> <span class="n">path</span>
+                                        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                                            <span class="c1"># Save as PNG fallback</span>
+                                            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
+                                                <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;.png&quot;</span><span class="p">),</span>
+                                                <span class="s2">&quot;wb&quot;</span><span class="p">,</span>
+                                            <span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                                                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">img_data</span><span class="p">)</span>
+                                            <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;.png&quot;</span><span class="p">)</span>
+                                    <span class="k">break</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⚠️  PowerShell URL capture failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># If all methods failed</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;❌ URL capture failed - Playwright not available and PowerShell failed&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Handle app-specific capture</span>
+    <span class="k">if</span> <span class="n">app</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">_manager</span><span class="o">.</span><span class="n">get_info</span><span class="p">()</span>
+        <span class="n">windows</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Windows&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Details&quot;</span><span class="p">,</span> <span class="p">[])</span>
+
+        <span class="c1"># Search for matching window</span>
+        <span class="n">app_lower</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">matching_window</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">win</span> <span class="ow">in</span> <span class="n">windows</span><span class="p">:</span>
+            <span class="n">process_name</span> <span class="o">=</span> <span class="n">win</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ProcessName&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="n">win</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Title&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">app_lower</span> <span class="ow">in</span> <span class="n">process_name</span> <span class="ow">or</span> <span class="n">app_lower</span> <span class="ow">in</span> <span class="n">title</span><span class="p">:</span>
+                <span class="n">matching_window</span> <span class="o">=</span> <span class="n">win</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">matching_window</span><span class="p">:</span>
+            <span class="n">handle</span> <span class="o">=</span> <span class="n">matching_window</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Handle&quot;</span><span class="p">)</span>
+            <span class="n">result_path</span> <span class="o">=</span> <span class="n">_manager</span><span class="o">.</span><span class="n">capture_window</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">result_path</span> <span class="ow">and</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📸 </span><span class="si">{</span><span class="n">matching_window</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ProcessName&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">result_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">result_path</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ App &#39;</span><span class="si">{</span><span class="n">app</span><span class="si">}</span><span class="s2">&#39; not found in visible windows&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Handle &#39;all&#39; shorthand</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">:</span>
+        <span class="n">capture_all</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># Take screenshot first to analyze it</span>
+    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S_</span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">temp_dir</span> <span class="o">=</span> <span class="s2">&quot;/tmp/scitex_capture_temp&quot;</span>
+    <span class="n">Path</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Take screenshot to temp location</span>
+    <span class="n">use_jpeg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="kc">True</span> <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">&quot;.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;.jpeg&quot;</span><span class="p">))</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="n">worker</span> <span class="o">=</span> <span class="n">ScreenshotWorker</span><span class="p">(</span>
+        <span class="n">output_dir</span><span class="o">=</span><span class="n">temp_dir</span><span class="p">,</span>
+        <span class="n">use_jpeg</span><span class="o">=</span><span class="n">use_jpeg</span><span class="p">,</span>
+        <span class="n">jpeg_quality</span><span class="o">=</span><span class="n">quality</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>  <span class="c1"># Use the verbose parameter passed by user</span>
+    <span class="p">)</span>
+
+    <span class="n">worker</span><span class="o">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="s2">&quot;capture&quot;</span>
+    <span class="n">worker</span><span class="o">.</span><span class="n">screenshot_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">worker</span><span class="o">.</span><span class="n">monitor</span> <span class="o">=</span> <span class="n">monitor_id</span>
+    <span class="n">worker</span><span class="o">.</span><span class="n">capture_all</span> <span class="o">=</span> <span class="n">capture_all</span>
+    <span class="n">temp_path</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">_take_screenshot</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">temp_path</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Detect category if auto_categorize enabled</span>
+    <span class="n">category</span> <span class="o">=</span> <span class="s2">&quot;stdout&quot;</span>
+    <span class="k">if</span> <span class="n">auto_categorize</span><span class="p">:</span>
+        <span class="c1"># First check if we&#39;re in an exception context</span>
+        <span class="k">if</span> <span class="n">_is_in_exception_context</span><span class="p">():</span>
+            <span class="n">category</span> <span class="o">=</span> <span class="s2">&quot;stderr&quot;</span>
+            <span class="c1"># Add exception info to message</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+
+            <span class="n">exc_info</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">message</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">exc_info</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">exc_info</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Try visual detection</span>
+            <span class="n">category</span> <span class="o">=</span> <span class="n">_detect_category</span><span class="p">(</span><span class="n">temp_path</span><span class="p">)</span>
+
+    <span class="c1"># Build monitor/scope tag for filename</span>
+    <span class="n">scope_tag</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">capture_all</span><span class="p">:</span>
+        <span class="n">scope_tag</span> <span class="o">=</span> <span class="s2">&quot;-all-monitors&quot;</span>
+    <span class="k">elif</span> <span class="n">monitor_id</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">scope_tag</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;-monitor</span><span class="si">{</span><span class="n">monitor_id</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="c1"># monitor_id=0 (primary) gets no tag for cleaner default names</span>
+
+    <span class="c1"># Normalize message for filename</span>
+    <span class="n">normalized_msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">message</span><span class="p">:</span>
+        <span class="c1"># Remove special chars, keep only alphanumeric and spaces</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+        <span class="n">normalized</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[^\w\s-]&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">message</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># First line only</span>
+        <span class="n">normalized</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[-\s]+&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">normalized</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+        <span class="n">normalized_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;-</span><span class="si">{</span><span class="n">normalized</span><span class="p">[:</span><span class="mi">50</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">normalized</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># Limit length</span>
+
+    <span class="c1"># Add category suffix</span>
+    <span class="n">category_suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;-</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="c1"># Handle path with category and message</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Include monitor/scope info in filename</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;~/.scitex/capture/&lt;timestamp&gt;&lt;scope&gt;&lt;message&gt;&lt;category_suffix&gt;.jpg&quot;</span>
+
+    <span class="c1"># Expand user home</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="c1"># Replace placeholders</span>
+    <span class="k">if</span> <span class="s2">&quot;&lt;timestamp&gt;&quot;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;timestamp&gt;&quot;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;&lt;scope&gt;&quot;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;scope&gt;&quot;</span><span class="p">,</span> <span class="n">scope_tag</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;&lt;message&gt;&quot;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;message&gt;&quot;</span><span class="p">,</span> <span class="n">normalized_msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;&lt;category_suffix&gt;&quot;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;category_suffix&gt;&quot;</span><span class="p">,</span> <span class="n">category_suffix</span><span class="p">)</span>
+
+    <span class="c1"># Ensure directory exists</span>
+    <span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">output_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Move to final location</span>
+    <span class="n">final_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">Path</span><span class="p">(</span><span class="n">temp_path</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">final_path</span><span class="p">)</span>
+
+    <span class="c1"># Add message with category as metadata</span>
+    <span class="k">if</span> <span class="n">message</span> <span class="ow">or</span> <span class="n">category</span> <span class="o">!=</span> <span class="s2">&quot;stdout&quot;</span><span class="p">:</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">category</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">message</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">category</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">]&quot;</span>
+        <span class="p">)</span>
+        <span class="n">_add_message_metadata</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">final_path</span><span class="p">),</span> <span class="n">metadata</span><span class="p">)</span>
+
+    <span class="c1"># Manage cache size (remove old files if needed)</span>
+    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~/.scitex/capture&quot;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">cache_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">_manage_cache_size</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">max_cache_gb</span><span class="p">)</span>
+
+    <span class="c1"># Print path for user feedback (useful in interactive sessions)</span>
+    <span class="n">final_path_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">final_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">category</span> <span class="o">==</span> <span class="s2">&quot;stderr&quot;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📸 stderr: </span><span class="si">{</span><span class="n">final_path_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📸 stdout: </span><span class="si">{</span><span class="n">final_path_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># In case print fails in some environments</span>
+            <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">final_path_str</span></div>
+
+
+
+<div class="viewcode-block" id="take_screenshot">
+<a class="viewcode-back" href="../../api/scitex_capture.utils.html#scitex_capture.take_screenshot">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">take_screenshot</span><span class="p">(</span>
+    <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">jpeg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">quality</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">85</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Take a single screenshot (simple interface).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    output_path : str, optional</span>
+<span class="sd">        Where to save the screenshot</span>
+<span class="sd">    jpeg : bool</span>
+<span class="sd">        Use JPEG format (True) or PNG (False)</span>
+<span class="sd">    quality : int</span>
+<span class="sd">        JPEG quality (1-100)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str or None</span>
+<span class="sd">        Path to saved screenshot</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_manager</span><span class="o">.</span><span class="n">take_single_screenshot</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">jpeg</span><span class="p">,</span> <span class="n">quality</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="start_monitor">
+<a class="viewcode-back" href="../../api/scitex_capture.utils.html#scitex_capture.start_monitor">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">start_monitor</span><span class="p">(</span>
+    <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;~/.scitex/capture/&quot;</span><span class="p">,</span>
+    <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">jpeg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">quality</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+    <span class="n">on_capture</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">on_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">monitor_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">capture_all</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ScreenshotWorker</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Start continuous screenshot monitoring.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    output_dir : str</span>
+<span class="sd">        Directory for screenshots (default: ~/.scitex/capture/)</span>
+<span class="sd">    interval : float</span>
+<span class="sd">        Seconds between captures</span>
+<span class="sd">    jpeg : bool</span>
+<span class="sd">        Use JPEG compression</span>
+<span class="sd">    quality : int</span>
+<span class="sd">        JPEG quality (1-100)</span>
+<span class="sd">    on_capture : callable, optional</span>
+<span class="sd">        Function called with filepath after each capture</span>
+<span class="sd">    on_error : callable, optional</span>
+<span class="sd">        Function called with exception on errors</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        Print status messages</span>
+<span class="sd">    monitor_id : int</span>
+<span class="sd">        Monitor number to capture (0-based index, default: 0 for primary monitor)</span>
+<span class="sd">    capture_all : bool</span>
+<span class="sd">        If True, capture all monitors combined (default: False)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ScreenshotWorker</span>
+<span class="sd">        The worker instance</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; # Simple monitoring</span>
+<span class="sd">    &gt;&gt;&gt; capture.start()</span>
+
+<span class="sd">    &gt;&gt;&gt; # With event hooks</span>
+<span class="sd">    &gt;&gt;&gt; capture.start(</span>
+<span class="sd">    ...     on_capture=lambda path: print(f&quot;Saved: {path}&quot;),</span>
+<span class="sd">    ...     on_error=lambda e: logging.error(e)</span>
+<span class="sd">    ... )</span>
+
+<span class="sd">    &gt;&gt;&gt; # Detect specific screen content</span>
+<span class="sd">    &gt;&gt;&gt; def check_error_dialog(path):</span>
+<span class="sd">    ...     if &quot;error&quot; in analyze_image(path):</span>
+<span class="sd">    ...         send_alert(f&quot;Error detected: {path}&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; capture.start(on_capture=check_error_dialog)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Expand user home directory</span>
+    <span class="n">output_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_manager</span><span class="o">.</span><span class="n">start_capture</span><span class="p">(</span>
+        <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span>
+        <span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span>
+        <span class="n">jpeg</span><span class="o">=</span><span class="n">jpeg</span><span class="p">,</span>
+        <span class="n">quality</span><span class="o">=</span><span class="n">quality</span><span class="p">,</span>
+        <span class="n">on_capture</span><span class="o">=</span><span class="n">on_capture</span><span class="p">,</span>
+        <span class="n">on_error</span><span class="o">=</span><span class="n">on_error</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="n">monitor_id</span><span class="o">=</span><span class="n">monitor_id</span><span class="p">,</span>
+        <span class="n">capture_all</span><span class="o">=</span><span class="n">capture_all</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="stop_monitor">
+<a class="viewcode-back" href="../../api/scitex_capture.utils.html#scitex_capture.stop_monitor">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stop_monitor</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stop continuous screenshot monitoring.&quot;&quot;&quot;</span>
+    <span class="n">_manager</span><span class="o">.</span><span class="n">stop_capture</span><span class="p">()</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_in_exception_context</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if we&#39;re currently in an exception handler.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+    <span class="c1"># Check if there&#39;s an active exception</span>
+    <span class="n">exc_info</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">exc_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_detect_category</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Detect screenshot category based on content.</span>
+<span class="sd">    Simple heuristic based on common error indicators.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Try OCR-based detection if available</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
+
+        <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+        <span class="c1"># Simple color-based heuristics</span>
+        <span class="c1"># Red dominant = likely error</span>
+        <span class="c1"># Yellow/orange dominant = likely warning</span>
+        <span class="n">pixels</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">&quot;RGB&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getdata</span><span class="p">()</span>
+        <span class="n">red_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">pixels</span> <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="mi">200</span> <span class="ow">and</span> <span class="n">g</span> <span class="o">&lt;</span> <span class="mi">100</span> <span class="ow">and</span> <span class="n">b</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="n">yellow_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">pixels</span> <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="mi">200</span> <span class="ow">and</span> <span class="n">g</span> <span class="o">&gt;</span> <span class="mi">150</span> <span class="ow">and</span> <span class="n">b</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">)</span>
+
+        <span class="n">total_pixels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pixels</span><span class="p">)</span>
+        <span class="n">red_ratio</span> <span class="o">=</span> <span class="n">red_count</span> <span class="o">/</span> <span class="n">total_pixels</span> <span class="k">if</span> <span class="n">total_pixels</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">yellow_ratio</span> <span class="o">=</span> <span class="n">yellow_count</span> <span class="o">/</span> <span class="n">total_pixels</span> <span class="k">if</span> <span class="n">total_pixels</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="c1"># Thresholds for detection</span>
+        <span class="k">if</span> <span class="n">red_ratio</span> <span class="o">&gt;</span> <span class="mf">0.05</span><span class="p">:</span>  <span class="c1"># More than 5% red pixels</span>
+            <span class="k">return</span> <span class="s2">&quot;error&quot;</span>
+        <span class="k">elif</span> <span class="n">yellow_ratio</span> <span class="o">&gt;</span> <span class="mf">0.05</span><span class="p">:</span>  <span class="c1"># More than 5% yellow pixels</span>
+            <span class="k">return</span> <span class="s2">&quot;warning&quot;</span>
+
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Check filename for common error keywords</span>
+    <span class="n">filename_lower</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">word</span> <span class="ow">in</span> <span class="n">filename_lower</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;fail&quot;</span><span class="p">,</span> <span class="s2">&quot;exception&quot;</span><span class="p">,</span> <span class="s2">&quot;crash&quot;</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="s2">&quot;stderr&quot;</span>
+    <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">word</span> <span class="ow">in</span> <span class="n">filename_lower</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;warn&quot;</span><span class="p">,</span> <span class="s2">&quot;alert&quot;</span><span class="p">,</span> <span class="s2">&quot;caution&quot;</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="s2">&quot;stderr&quot;</span>  <span class="c1"># Warnings also go to stderr</span>
+
+    <span class="k">return</span> <span class="s2">&quot;stdout&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_add_message_metadata</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add message as metadata to image file.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Try to add EXIF comment using PIL</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
+
+        <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+        <span class="c1"># Add comment to image metadata</span>
+        <span class="n">exif</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">getexif</span><span class="p">()</span>
+        <span class="n">exif</span><span class="p">[</span><span class="mh">0x9286</span><span class="p">]</span> <span class="o">=</span> <span class="n">message</span>  <span class="c1"># UserComment EXIF tag</span>
+
+        <span class="c1"># Save with metadata</span>
+        <span class="n">img</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">exif</span><span class="o">=</span><span class="n">exif</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="c1"># If PIL not available, create companion text file</span>
+        <span class="n">text_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.txt&quot;</span><span class="p">)</span>
+        <span class="n">text_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="c1"># Convenience exports</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;capture&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;take_screenshot&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;start_monitor&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;stop_monitor&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1"># EOF</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yusuke Watanabe.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

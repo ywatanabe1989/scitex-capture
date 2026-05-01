@@ -1,0 +1,6 @@
+scitex\_capture.gif
+===================
+
+.. currentmodule:: scitex_capture
+
+.. autofunction:: gif

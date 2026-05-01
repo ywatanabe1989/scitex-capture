@@ -1,0 +1,15 @@
+scitex\_capture.grid
+====================
+
+.. automodule:: scitex_capture.grid
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      add_monitor_info_overlay
+      draw_cursor_overlay
+      draw_grid_overlay
+      get_display_info
+   

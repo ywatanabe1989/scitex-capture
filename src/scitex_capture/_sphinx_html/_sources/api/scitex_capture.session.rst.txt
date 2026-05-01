@@ -1,0 +1,6 @@
+scitex\_capture.session
+=======================
+
+.. currentmodule:: scitex_capture
+
+.. autofunction:: session

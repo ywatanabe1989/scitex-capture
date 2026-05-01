@@ -1,0 +1,6 @@
+scitex\_capture.capture
+=======================
+
+.. currentmodule:: scitex_capture
+
+.. autofunction:: capture

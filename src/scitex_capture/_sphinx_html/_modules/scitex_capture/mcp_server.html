@@ -1,0 +1,1147 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scitex_capture.mcp_server &mdash; scitex-capture 0.1.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=92734c54"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            scitex-capture
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/scitex_capture.html">scitex_capture</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">scitex-capture</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../scitex_capture.html">scitex_capture</a></li>
+      <li class="breadcrumb-item active">scitex_capture.mcp_server</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scitex_capture.mcp_server</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># Timestamp: &quot;2025-10-17 03:24:58 (ywatanabe)&quot;</span>
+<span class="c1"># File: /home/ywatanabe/proj/scitex-code/src/scitex/capture/mcp_server.py</span>
+<span class="c1"># ----------------------------------------</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">__FILE__</span> <span class="o">=</span> <span class="s2">&quot;./src/scitex/capture/mcp_server.py&quot;</span>
+<span class="n">__DIR__</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__FILE__</span><span class="p">)</span>
+<span class="c1"># ----------------------------------------</span>
+
+<span class="sd">&quot;&quot;&quot;MCP Server for SciTeX Capture - Screen Capture for Python.</span>
+
+<span class="sd">.. deprecated::</span>
+<span class="sd">    This standalone server is deprecated. Use the unified scitex MCP server:</span>
+<span class="sd">    CLI: scitex serve</span>
+<span class="sd">    Python: from scitex.mcp_server import run_server</span>
+
+<span class="sd">Provides screenshot capture capabilities via Model Context Protocol.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+    <span class="s2">&quot;scitex.capture.mcp_server is deprecated. Use &#39;scitex serve&#39; or &quot;</span>
+    <span class="s2">&quot;&#39;from scitex.mcp_server import run_server&#39; for the unified MCP server.&quot;</span><span class="p">,</span>
+    <span class="ne">DeprecationWarning</span><span class="p">,</span>
+    <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="c1"># Graceful MCP dependency handling</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">mcp.types</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">types</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp.server</span><span class="w"> </span><span class="kn">import</span> <span class="n">NotificationOptions</span><span class="p">,</span> <span class="n">Server</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp.server.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">InitializationOptions</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">mcp.server.stdio</span><span class="w"> </span><span class="kn">import</span> <span class="n">stdio_server</span>
+
+    <span class="n">MCP_AVAILABLE</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">MCP_AVAILABLE</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+    <span class="n">Server</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+    <span class="n">NotificationOptions</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+    <span class="n">InitializationOptions</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+    <span class="n">stdio_server</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+
+<span class="c1"># Directory configuration</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">scitex</span><span class="w"> </span><span class="kn">import</span> <span class="n">capture</span>
+
+<span class="c1"># Use SCITEX_DIR environment variable if set, otherwise default to ~/.scitex</span>
+<span class="n">SCITEX_BASE_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;SCITEX_DIR&quot;</span><span class="p">,</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.scitex&quot;</span><span class="p">))</span>
+<span class="n">SCITEX_CAPTURE_DIR</span> <span class="o">=</span> <span class="n">SCITEX_BASE_DIR</span> <span class="o">/</span> <span class="s2">&quot;capture&quot;</span>
+<span class="n">LEGACY_CAPTURE_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.cache&quot;</span> <span class="o">/</span> <span class="s2">&quot;cammy&quot;</span>
+
+
+<div class="viewcode-block" id="get_capture_dir">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.get_capture_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_capture_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the screenshot capture directory.</span>
+<span class="sd">    Uses $SCITEX_DIR/capture if SCITEX_DIR is set, otherwise ~/.scitex/capture.</span>
+<span class="sd">    Migrates from legacy location (~/.cache/cammy) if needed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Path to $SCITEX_DIR/capture or ~/.scitex/capture (migrating from ~/.cache/cammy if needed)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">new_dir</span> <span class="o">=</span> <span class="n">SCITEX_CAPTURE_DIR</span>
+    <span class="n">old_dir</span> <span class="o">=</span> <span class="n">LEGACY_CAPTURE_DIR</span>
+
+    <span class="c1"># Create new directory if it doesn&#39;t exist</span>
+    <span class="n">new_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Migrate from old location if exists and new is empty</span>
+    <span class="k">if</span> <span class="n">old_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">new_screenshots</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.jpg&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">new_screenshots</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_screenshots</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Move files from old to new location</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">old_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.jpg&quot;</span><span class="p">):</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_dir</span> <span class="o">/</span> <span class="n">img</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Migrated screenshots from </span><span class="si">{</span><span class="n">old_dir</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">new_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Could not migrate some files: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">new_dir</span></div>
+
+
+
+<div class="viewcode-block" id="CaptureServer">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.CaptureServer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CaptureServer</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s2">&quot;scitex-capture-server&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_active</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_worker</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_handlers</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CaptureServer.setup_handlers">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.CaptureServer.setup_handlers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_handlers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nd">@self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">list_tools</span><span class="p">()</span>
+        <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_list_tools</span><span class="p">():</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;capture_screenshot&quot;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Capture screenshot - monitor, window, browser, or everything including Windows screens from WSL&quot;</span><span class="p">,</span>
+                    <span class="n">inputSchema</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Optional message to include in filename&quot;</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;monitor_id&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Monitor number (0-based, default: 0 for primary monitor)&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;all&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;boolean&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Capture all monitors (shorthand)&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;app&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;App name to capture (e.g., &#39;chrome&#39;, &#39;code&#39;)&quot;</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;URL to capture (e.g., &#39;127.0.0.1:8000&#39; or &#39;http://localhost:3000&#39;)&quot;</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;quality&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;JPEG quality (1-100, default: 85)&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;minimum&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                                <span class="s2">&quot;maximum&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="mi">85</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;return_base64&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;boolean&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Return screenshot as base64 string&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="p">},</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                <span class="p">),</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;start_monitoring&quot;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Start continuous screenshot monitoring at regular intervals&quot;</span><span class="p">,</span>
+                    <span class="n">inputSchema</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;interval&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Seconds between captures (default: 1.0)&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;minimum&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;monitor_id&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Monitor number (0-based, default: 0 for primary monitor)&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;capture_all&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;boolean&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Capture all monitors combined into single image (overrides monitor_id)&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;output_dir&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Directory for screenshots (default: ~/.scitex/capture)&quot;</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;quality&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;JPEG quality (1-100, default: 60)&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;minimum&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                                <span class="s2">&quot;maximum&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;boolean&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Show capture messages&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                            <span class="p">},</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                <span class="p">),</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;stop_monitoring&quot;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Stop continuous screenshot monitoring&quot;</span><span class="p">,</span>
+                    <span class="n">inputSchema</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{}},</span>
+                <span class="p">),</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;get_monitoring_status&quot;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Get current monitoring status and statistics&quot;</span><span class="p">,</span>
+                    <span class="n">inputSchema</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{}},</span>
+                <span class="p">),</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;analyze_screenshot&quot;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Analyze a screenshot for error indicators (stdout/stderr categorization)&quot;</span><span class="p">,</span>
+                    <span class="n">inputSchema</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Path to screenshot to analyze&quot;</span><span class="p">,</span>
+                            <span class="p">}</span>
+                        <span class="p">},</span>
+                        <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span>
+                    <span class="p">},</span>
+                <span class="p">),</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;list_recent_screenshots&quot;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;List recent screenshots from cache&quot;</span><span class="p">,</span>
+                    <span class="n">inputSchema</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Maximum number of screenshots to list&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                                <span class="s2">&quot;minimum&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                                <span class="s2">&quot;maximum&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Filter by category (stdout/stderr)&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;enum&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;stdout&quot;</span><span class="p">,</span> <span class="s2">&quot;stderr&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">],</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+                            <span class="p">},</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                <span class="p">),</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;clear_cache&quot;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Clear screenshot cache or manage cache size&quot;</span><span class="p">,</span>
+                    <span class="n">inputSchema</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;max_size_gb&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Keep cache under this size in GB (removes oldest files)&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;minimum&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;clear_all&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;boolean&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Remove all cached screenshots&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="p">},</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                <span class="p">),</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;create_gif&quot;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Create an animated GIF from screenshots to summarize sessions or workflows&quot;</span><span class="p">,</span>
+                    <span class="n">inputSchema</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;session_id&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Session ID to create GIF from (e.g., &#39;20250823_104523&#39;). Use &#39;latest&#39; for most recent session.&quot;</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;image_paths&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;array&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;items&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">},</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;List of image file paths to create GIF from (alternative to session_id)&quot;</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;pattern&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Glob pattern for images to include (alternative to session_id/image_paths)&quot;</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;output_path&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Output GIF file path (auto-generated if not specified)&quot;</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;duration&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Duration per frame in seconds (default: 0.5)&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;minimum&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                                <span class="s2">&quot;maximum&quot;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;optimize&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;boolean&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Optimize GIF for smaller file size (default: true)&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;max_frames&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Maximum number of frames to include (default: no limit)&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;minimum&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                                <span class="s2">&quot;maximum&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                            <span class="p">},</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                <span class="p">),</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;list_sessions&quot;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;List available monitoring sessions that can be converted to GIFs&quot;</span><span class="p">,</span>
+                    <span class="n">inputSchema</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Maximum number of sessions to list (default: 10)&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;minimum&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                                <span class="s2">&quot;maximum&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                            <span class="p">}</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                <span class="p">),</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;get_info&quot;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Enumerate all monitors, virtual desktops, and visible windows&quot;</span><span class="p">,</span>
+                    <span class="n">inputSchema</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                    <span class="p">},</span>
+                <span class="p">),</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;list_windows&quot;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;List all visible windows with their handles and process names&quot;</span><span class="p">,</span>
+                    <span class="n">inputSchema</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                    <span class="p">},</span>
+                <span class="p">),</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">Tool</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;capture_window&quot;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Capture a specific window by its handle&quot;</span><span class="p">,</span>
+                    <span class="n">inputSchema</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;window_handle&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Window handle from list_windows&quot;</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;output_path&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Optional output path for screenshot&quot;</span><span class="p">,</span>
+                            <span class="p">},</span>
+                            <span class="s2">&quot;quality&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;JPEG quality (1-100, default: 85)&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;minimum&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                                <span class="s2">&quot;maximum&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="mi">85</span><span class="p">,</span>
+                            <span class="p">},</span>
+                        <span class="p">},</span>
+                        <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;window_handle&quot;</span><span class="p">],</span>
+                    <span class="p">},</span>
+                <span class="p">),</span>
+            <span class="p">]</span>
+
+        <span class="nd">@self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">call_tool</span><span class="p">()</span>
+        <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_call_tool</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">arguments</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;capture_screenshot&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">capture_screenshot</span><span class="p">(</span><span class="o">**</span><span class="n">arguments</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;start_monitoring&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_monitoring</span><span class="p">(</span><span class="o">**</span><span class="n">arguments</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;stop_monitoring&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_monitoring</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;get_monitoring_status&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_monitoring_status</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;analyze_screenshot&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyze_screenshot</span><span class="p">(</span><span class="o">**</span><span class="n">arguments</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;list_recent_screenshots&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_recent_screenshots</span><span class="p">(</span><span class="o">**</span><span class="n">arguments</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;clear_cache&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">(</span><span class="o">**</span><span class="n">arguments</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;create_gif&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_gif</span><span class="p">(</span><span class="o">**</span><span class="n">arguments</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;list_sessions&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_sessions</span><span class="p">(</span><span class="o">**</span><span class="n">arguments</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;get_info&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_info_tool</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;list_windows&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_windows_tool</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;capture_window&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">capture_window_tool</span><span class="p">(</span><span class="o">**</span><span class="n">arguments</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown tool: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Provide screenshots as resources</span>
+        <span class="nd">@self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">list_resources</span><span class="p">()</span>
+        <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_list_resources</span><span class="p">():</span>
+            <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">get_capture_dir</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cache_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">return</span> <span class="p">[]</span>
+
+            <span class="n">resources</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># Get last 20 screenshots, sorted by modification time</span>
+            <span class="n">screenshots</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="n">cache_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.jpg&quot;</span><span class="p">),</span>
+                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">,</span>
+                <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)[:</span><span class="mi">20</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">img_file</span> <span class="ow">in</span> <span class="n">screenshots</span><span class="p">:</span>
+                <span class="c1"># Parse category from filename</span>
+                <span class="n">category</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;stdout&quot;</span>
+                    <span class="k">if</span> <span class="s2">&quot;-stdout.jpg&quot;</span> <span class="ow">in</span> <span class="n">img_file</span><span class="o">.</span><span class="n">name</span>
+                    <span class="k">else</span> <span class="p">(</span><span class="s2">&quot;stderr&quot;</span> <span class="k">if</span> <span class="s2">&quot;-stderr.jpg&quot;</span> <span class="ow">in</span> <span class="n">img_file</span><span class="o">.</span><span class="n">name</span> <span class="k">else</span> <span class="s2">&quot;unknown&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+
+                <span class="n">mtime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">img_file</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">)</span>
+                <span class="n">resources</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">types</span><span class="o">.</span><span class="n">Resource</span><span class="p">(</span>
+                        <span class="n">uri</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;screenshot://</span><span class="si">{</span><span class="n">img_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="n">name</span><span class="o">=</span><span class="n">img_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s2"> screenshot from </span><span class="si">{</span><span class="n">mtime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="n">mimeType</span><span class="o">=</span><span class="s2">&quot;image/jpeg&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="n">resources</span>
+
+        <span class="nd">@self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">read_resource</span><span class="p">()</span>
+        <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_read_resource</span><span class="p">(</span><span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">uri</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;screenshot://&quot;</span><span class="p">):</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">uri</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;screenshot://&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">filepath</span> <span class="o">=</span> <span class="n">get_capture_dir</span><span class="p">()</span> <span class="o">/</span> <span class="n">filename</span>
+
+                <span class="k">if</span> <span class="n">filepath</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">content</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+
+                    <span class="k">return</span> <span class="n">types</span><span class="o">.</span><span class="n">ResourceContent</span><span class="p">(</span>
+                        <span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span> <span class="n">mimeType</span><span class="o">=</span><span class="s2">&quot;image/jpeg&quot;</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">content</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Screenshot not found: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CaptureServer.capture_screenshot">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.CaptureServer.capture_screenshot">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">capture_screenshot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">monitor_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="nb">all</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">app</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">quality</span><span class="o">=</span><span class="mi">85</span><span class="p">,</span>
+        <span class="n">return_base64</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Capture a screenshot - monitor, window, browser, or everything.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Run in thread pool since capture is sync</span>
+            <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+
+            <span class="c1"># Use capture.snap which now handles all, app, url parameters</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">do_capture</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">capture</span><span class="o">.</span><span class="n">snap</span><span class="p">(</span>
+                    <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span>
+                    <span class="n">quality</span><span class="o">=</span><span class="n">quality</span><span class="p">,</span>
+                    <span class="n">monitor_id</span><span class="o">=</span><span class="n">monitor_id</span><span class="p">,</span>
+                    <span class="nb">all</span><span class="o">=</span><span class="nb">all</span><span class="p">,</span>
+                    <span class="n">app</span><span class="o">=</span><span class="n">app</span><span class="p">,</span>
+                    <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span>
+                    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="n">path</span> <span class="o">=</span> <span class="k">await</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">do_capture</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Failed to capture screenshot&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+
+            <span class="c1"># Determine category from filename</span>
+            <span class="n">category</span> <span class="o">=</span> <span class="s2">&quot;stderr&quot;</span> <span class="k">if</span> <span class="s2">&quot;-stderr.jpg&quot;</span> <span class="ow">in</span> <span class="n">path</span> <span class="k">else</span> <span class="s2">&quot;stdout&quot;</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span>
+                <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="n">category</span><span class="p">,</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Screenshot saved to </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="n">return_base64</span> <span class="ow">and</span> <span class="n">path</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">result</span><span class="p">[</span><span class="s2">&quot;base64&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="CaptureServer.start_monitoring">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.CaptureServer.start_monitoring">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">start_monitoring</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">interval</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">monitor_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">capture_all</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">quality</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start continuous monitoring.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_active</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Monitoring already active&quot;</span><span class="p">}</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+
+            <span class="c1"># Use a lambda to pass the monitor parameters correctly</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">start_with_monitor</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">capture</span><span class="o">.</span><span class="n">start_monitor</span><span class="p">(</span>
+                    <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span> <span class="ow">or</span> <span class="s2">&quot;~/.scitex/capture/&quot;</span><span class="p">,</span>
+                    <span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span>
+                    <span class="n">jpeg</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">quality</span><span class="o">=</span><span class="n">quality</span><span class="p">,</span>
+                    <span class="n">on_capture</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">on_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+                    <span class="n">monitor_id</span><span class="o">=</span><span class="n">monitor_id</span><span class="p">,</span>
+                    <span class="n">capture_all</span><span class="o">=</span><span class="n">capture_all</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_worker</span> <span class="o">=</span> <span class="k">await</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span>
+                <span class="kc">None</span><span class="p">,</span> <span class="n">start_with_monitor</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_active</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Started monitoring with </span><span class="si">{</span><span class="n">interval</span><span class="si">}</span><span class="s2">s interval on monitor </span><span class="si">{</span><span class="n">monitor_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;output_dir&quot;</span><span class="p">:</span> <span class="n">output_dir</span> <span class="ow">or</span> <span class="s2">&quot;~/.scitex/capture/&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;interval&quot;</span><span class="p">:</span> <span class="n">interval</span><span class="p">,</span>
+                <span class="s2">&quot;monitor_id&quot;</span><span class="p">:</span> <span class="n">monitor_id</span><span class="p">,</span>
+                <span class="s2">&quot;capture_all&quot;</span><span class="p">:</span> <span class="n">capture_all</span><span class="p">,</span>
+                <span class="s2">&quot;quality&quot;</span><span class="p">:</span> <span class="n">quality</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="CaptureServer.stop_monitoring">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.CaptureServer.stop_monitoring">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stop_monitoring</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop continuous monitoring.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_active</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Monitoring not active&quot;</span><span class="p">}</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+            <span class="k">await</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">capture</span><span class="o">.</span><span class="n">stop</span><span class="p">)</span>
+
+            <span class="c1"># Get stats from worker</span>
+            <span class="n">stats</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_worker</span><span class="p">:</span>
+                <span class="n">stats</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;screenshots_taken&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_worker</span><span class="o">.</span><span class="n">screenshot_count</span><span class="p">,</span>
+                    <span class="s2">&quot;session_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_worker</span><span class="o">.</span><span class="n">session_id</span><span class="p">,</span>
+                    <span class="s2">&quot;output_dir&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">monitoring_worker</span><span class="o">.</span><span class="n">output_dir</span><span class="p">),</span>
+                <span class="p">}</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_active</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_worker</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Monitoring stopped&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">stats</span><span class="p">}</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="CaptureServer.get_monitoring_status">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.CaptureServer.get_monitoring_status">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_monitoring_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get monitoring status.&quot;&quot;&quot;</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;active&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_active</span><span class="p">,</span>
+            <span class="s2">&quot;cache_dir&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_capture_dir</span><span class="p">()),</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_active</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_worker</span><span class="p">:</span>
+            <span class="n">status</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;screenshots_taken&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_worker</span><span class="o">.</span><span class="n">screenshot_count</span><span class="p">,</span>
+                    <span class="s2">&quot;session_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_worker</span><span class="o">.</span><span class="n">session_id</span><span class="p">,</span>
+                    <span class="s2">&quot;interval&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_worker</span><span class="o">.</span><span class="n">interval_sec</span><span class="p">,</span>
+                    <span class="s2">&quot;output_dir&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">monitoring_worker</span><span class="o">.</span><span class="n">output_dir</span><span class="p">),</span>
+                    <span class="s2">&quot;running&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_worker</span><span class="o">.</span><span class="n">running</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Get cache size</span>
+        <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">get_capture_dir</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">cache_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">total_size</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">cache_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.jpg&quot;</span><span class="p">))</span>
+            <span class="n">status</span><span class="p">[</span><span class="s2">&quot;cache_size_mb&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">total_size</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">status</span><span class="p">[</span><span class="s2">&quot;screenshot_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">cache_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.jpg&quot;</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">status</span></div>
+
+
+<div class="viewcode-block" id="CaptureServer.analyze_screenshot">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.CaptureServer.analyze_screenshot">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">analyze_screenshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Analyze screenshot for errors/warnings.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Use scitex.capture&#39;s internal detection</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_detect_category</span>
+
+            <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+            <span class="n">category</span> <span class="o">=</span> <span class="k">await</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">_detect_category</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+            <span class="c1"># Get file info</span>
+            <span class="n">path_obj</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">path_obj</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;File not found: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span>
+                <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="n">category</span><span class="p">,</span>
+                <span class="s2">&quot;is_error&quot;</span><span class="p">:</span> <span class="n">category</span> <span class="o">==</span> <span class="s2">&quot;stderr&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;size_kb&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">path_obj</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="s2">&quot;modified&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span>
+                    <span class="n">path_obj</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+            <span class="p">}</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="CaptureServer.list_recent_screenshots">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.CaptureServer.list_recent_screenshots">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_recent_screenshots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List recent screenshots from cache.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">get_capture_dir</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cache_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;screenshots&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Cache directory does not exist&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+
+            <span class="c1"># Get all screenshots</span>
+            <span class="n">screenshots</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cache_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.jpg&quot;</span><span class="p">))</span>
+
+            <span class="c1"># Filter by category if specified</span>
+            <span class="k">if</span> <span class="n">category</span> <span class="o">==</span> <span class="s2">&quot;stdout&quot;</span><span class="p">:</span>
+                <span class="n">screenshots</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">screenshots</span> <span class="k">if</span> <span class="s2">&quot;-stdout.jpg&quot;</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">category</span> <span class="o">==</span> <span class="s2">&quot;stderr&quot;</span><span class="p">:</span>
+                <span class="n">screenshots</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">screenshots</span> <span class="k">if</span> <span class="s2">&quot;-stderr.jpg&quot;</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+
+            <span class="c1"># Sort by modification time (newest first)</span>
+            <span class="n">screenshots</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># Limit results</span>
+            <span class="n">screenshots</span> <span class="o">=</span> <span class="n">screenshots</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span>
+
+            <span class="c1"># Build result</span>
+            <span class="n">result_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">screenshot</span> <span class="ow">in</span> <span class="n">screenshots</span><span class="p">:</span>
+                <span class="n">cat</span> <span class="o">=</span> <span class="s2">&quot;stderr&quot;</span> <span class="k">if</span> <span class="s2">&quot;-stderr.jpg&quot;</span> <span class="ow">in</span> <span class="n">screenshot</span><span class="o">.</span><span class="n">name</span> <span class="k">else</span> <span class="s2">&quot;stdout&quot;</span>
+                <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="n">screenshot</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">screenshot</span><span class="p">),</span>
+                        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="n">cat</span><span class="p">,</span>
+                        <span class="s2">&quot;size_kb&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">screenshot</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                        <span class="s2">&quot;modified&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span>
+                            <span class="n">screenshot</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span>
+                        <span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;screenshots&quot;</span><span class="p">:</span> <span class="n">result_list</span><span class="p">,</span>
+                <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">result_list</span><span class="p">),</span>
+                <span class="s2">&quot;total_in_cache&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">cache_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.jpg&quot;</span><span class="p">))),</span>
+            <span class="p">}</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="CaptureServer.clear_cache">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.CaptureServer.clear_cache">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_size_gb</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">clear_all</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear or manage cache size.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">get_capture_dir</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cache_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Cache directory does not exist&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+
+            <span class="k">if</span> <span class="n">clear_all</span><span class="p">:</span>
+                <span class="c1"># Remove all screenshots</span>
+                <span class="n">removed</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">screenshot</span> <span class="ow">in</span> <span class="n">cache_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.jpg&quot;</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">screenshot</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+                        <span class="n">removed</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Removed </span><span class="si">{</span><span class="n">removed</span><span class="si">}</span><span class="s2"> screenshots&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;removed_count&quot;</span><span class="p">:</span> <span class="n">removed</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Use scitex.capture&#39;s cache management</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_manage_cache_size</span>
+
+                <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+                <span class="k">await</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span>
+                    <span class="kc">None</span><span class="p">,</span> <span class="n">_manage_cache_size</span><span class="p">,</span> <span class="n">cache_dir</span><span class="p">,</span> <span class="n">max_size_gb</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Get new cache size</span>
+                <span class="n">total_size</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">cache_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.jpg&quot;</span><span class="p">))</span>
+
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Cache managed to stay under </span><span class="si">{</span><span class="n">max_size_gb</span><span class="si">}</span><span class="s2">GB&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;cache_size_mb&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">total_size</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span>
+                    <span class="s2">&quot;max_size_gb&quot;</span><span class="p">:</span> <span class="n">max_size_gb</span><span class="p">,</span>
+                <span class="p">}</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="CaptureServer.create_gif">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.CaptureServer.create_gif">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_gif</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">session_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">image_paths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">pattern</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">duration</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">optimize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">max_frames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create GIF from screenshots.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">.gif</span><span class="w"> </span><span class="kn">import</span> <span class="n">GifCreator</span>
+
+            <span class="n">creator</span> <span class="o">=</span> <span class="n">GifCreator</span><span class="p">()</span>
+            <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+
+            <span class="c1"># Determine which creation method to use</span>
+            <span class="k">if</span> <span class="n">session_id</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">session_id</span> <span class="o">==</span> <span class="s2">&quot;latest&quot;</span><span class="p">:</span>
+                    <span class="c1"># Use most recent session</span>
+                    <span class="n">result_path</span> <span class="o">=</span> <span class="k">await</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span>
+                        <span class="kc">None</span><span class="p">,</span>
+                        <span class="n">creator</span><span class="o">.</span><span class="n">create_gif_from_recent_session</span><span class="p">,</span>
+                        <span class="s2">&quot;~/.scitex/capture&quot;</span><span class="p">,</span>
+                        <span class="n">duration</span><span class="p">,</span>
+                        <span class="n">optimize</span><span class="p">,</span>
+                        <span class="n">max_frames</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Use specific session</span>
+                    <span class="n">result_path</span> <span class="o">=</span> <span class="k">await</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span>
+                        <span class="kc">None</span><span class="p">,</span>
+                        <span class="n">creator</span><span class="o">.</span><span class="n">create_gif_from_session</span><span class="p">,</span>
+                        <span class="n">session_id</span><span class="p">,</span>
+                        <span class="n">output_path</span><span class="p">,</span>
+                        <span class="s2">&quot;~/.scitex/capture&quot;</span><span class="p">,</span>
+                        <span class="n">duration</span><span class="p">,</span>
+                        <span class="n">optimize</span><span class="p">,</span>
+                        <span class="n">max_frames</span><span class="p">,</span>
+                    <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">image_paths</span><span class="p">:</span>
+                <span class="c1"># Use specific image paths</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">output_path</span><span class="p">:</span>
+                    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S&quot;</span><span class="p">)</span>
+                    <span class="n">output_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;~/.scitex/capture/custom_gif_</span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">.gif&quot;</span>
+
+                <span class="n">result_path</span> <span class="o">=</span> <span class="k">await</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span>
+                    <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">creator</span><span class="o">.</span><span class="n">create_gif_from_files</span><span class="p">,</span>
+                    <span class="n">image_paths</span><span class="p">,</span>
+                    <span class="n">output_path</span><span class="p">,</span>
+                    <span class="n">duration</span><span class="p">,</span>
+                    <span class="n">optimize</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">pattern</span><span class="p">:</span>
+                <span class="c1"># Use glob pattern</span>
+                <span class="n">result_path</span> <span class="o">=</span> <span class="k">await</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span>
+                    <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">creator</span><span class="o">.</span><span class="n">create_gif_from_pattern</span><span class="p">,</span>
+                    <span class="n">pattern</span><span class="p">,</span>
+                    <span class="n">output_path</span><span class="p">,</span>
+                    <span class="n">duration</span><span class="p">,</span>
+                    <span class="n">optimize</span><span class="p">,</span>
+                    <span class="n">max_frames</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Must specify either session_id, image_paths, or pattern&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+
+            <span class="k">if</span> <span class="n">result_path</span><span class="p">:</span>
+                <span class="c1"># Get file info</span>
+                <span class="n">path_obj</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">result_path</span><span class="p">)</span>
+                <span class="n">file_size</span> <span class="o">=</span> <span class="n">path_obj</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span> <span class="o">/</span> <span class="mi">1024</span>  <span class="c1"># KB</span>
+
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">result_path</span><span class="p">,</span>
+                    <span class="s2">&quot;size_kb&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">file_size</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;GIF created successfully: </span><span class="si">{</span><span class="n">result_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;duration_per_frame&quot;</span><span class="p">:</span> <span class="n">duration</span><span class="p">,</span>
+                    <span class="s2">&quot;optimized&quot;</span><span class="p">:</span> <span class="n">optimize</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Failed to create GIF - no suitable images found&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;PIL (Pillow) is required for GIF creation. Install with: pip install Pillow&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="CaptureServer.list_sessions">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.CaptureServer.list_sessions">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_sessions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List available monitoring sessions.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">.gif</span><span class="w"> </span><span class="kn">import</span> <span class="n">GifCreator</span>
+
+            <span class="n">creator</span> <span class="o">=</span> <span class="n">GifCreator</span><span class="p">()</span>
+            <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+
+            <span class="n">sessions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span>
+                <span class="kc">None</span><span class="p">,</span> <span class="n">creator</span><span class="o">.</span><span class="n">get_recent_sessions</span><span class="p">,</span> <span class="s2">&quot;~/.scitex/capture&quot;</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Limit results</span>
+            <span class="n">sessions</span> <span class="o">=</span> <span class="n">sessions</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span>
+
+            <span class="c1"># Get details for each session</span>
+            <span class="n">session_details</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">get_capture_dir</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">session_id</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
+                <span class="c1"># Count screenshots in session</span>
+                <span class="n">jpg_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cache_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">_*.jpg&quot;</span><span class="p">))</span>
+                <span class="n">png_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cache_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">session_id</span><span class="si">}</span><span class="s2">_*.png&quot;</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">jpg_files</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">png_files</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">files</span> <span class="o">=</span> <span class="n">jpg_files</span> <span class="o">+</span> <span class="n">png_files</span>
+                <span class="n">files</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">files</span><span class="p">:</span>
+                    <span class="c1"># Get session info</span>
+                    <span class="n">first_file</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">last_file</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">total_size</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">)</span>
+
+                    <span class="n">session_details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;session_id&quot;</span><span class="p">:</span> <span class="n">session_id</span><span class="p">,</span>
+                            <span class="s2">&quot;screenshot_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">),</span>
+                            <span class="s2">&quot;first_screenshot&quot;</span><span class="p">:</span> <span class="n">first_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                            <span class="s2">&quot;last_screenshot&quot;</span><span class="p">:</span> <span class="n">last_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                            <span class="s2">&quot;total_size_kb&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">total_size</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                            <span class="s2">&quot;start_time&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span>
+                                <span class="n">first_file</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span>
+                            <span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+                            <span class="s2">&quot;end_time&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span>
+                                <span class="n">last_file</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span>
+                            <span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+                        <span class="p">}</span>
+                    <span class="p">)</span>
+
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;sessions&quot;</span><span class="p">:</span> <span class="n">session_details</span><span class="p">,</span>
+                <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">session_details</span><span class="p">),</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">session_details</span><span class="p">)</span><span class="si">}</span><span class="s2"> monitoring sessions&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="CaptureServer.get_info_tool">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.CaptureServer.get_info_tool">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_info_tool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Enumerate all monitors and virtual desktops.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="k">await</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">capture</span><span class="o">.</span><span class="n">get_info</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;monitors&quot;</span><span class="p">:</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Monitors&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+                <span class="s2">&quot;virtual_desktops&quot;</span><span class="p">:</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;VirtualDesktops&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+                <span class="s2">&quot;windows&quot;</span><span class="p">:</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Windows&quot;</span><span class="p">,</span> <span class="p">{}),</span>
+                <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Timestamp&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="CaptureServer.list_windows_tool">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.CaptureServer.list_windows_tool">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_windows_tool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List all visible windows.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="k">await</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">capture</span><span class="o">.</span><span class="n">get_info</span><span class="p">)</span>
+
+            <span class="n">windows</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Windows&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">window_list</span> <span class="o">=</span> <span class="n">windows</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Details&quot;</span><span class="p">,</span> <span class="p">[])</span>
+
+            <span class="c1"># Format for easy use</span>
+            <span class="n">formatted_windows</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">win</span> <span class="ow">in</span> <span class="n">window_list</span><span class="p">:</span>
+                <span class="n">formatted_windows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;handle&quot;</span><span class="p">:</span> <span class="n">win</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Handle&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">win</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Title&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;process_name&quot;</span><span class="p">:</span> <span class="n">win</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ProcessName&quot;</span><span class="p">),</span>
+                        <span class="s2">&quot;process_id&quot;</span><span class="p">:</span> <span class="n">win</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ProcessId&quot;</span><span class="p">),</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;windows&quot;</span><span class="p">:</span> <span class="n">formatted_windows</span><span class="p">,</span>
+                <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">formatted_windows</span><span class="p">),</span>
+                <span class="s2">&quot;visible_count&quot;</span><span class="p">:</span> <span class="n">windows</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;VisibleCount&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">formatted_windows</span><span class="p">)</span><span class="si">}</span><span class="s2"> windows on current virtual desktop&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="CaptureServer.capture_window_tool">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.CaptureServer.capture_window_tool">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">capture_window_tool</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">window_handle</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">quality</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">85</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Capture a specific window by handle.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="k">await</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span>
+                <span class="kc">None</span><span class="p">,</span> <span class="n">capture</span><span class="o">.</span><span class="n">capture_window</span><span class="p">,</span> <span class="n">window_handle</span><span class="p">,</span> <span class="n">output_path</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span>
+                    <span class="s2">&quot;window_handle&quot;</span><span class="p">:</span> <span class="n">window_handle</span><span class="p">,</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Window captured to </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Failed to capture window </span><span class="si">{</span><span class="n">window_handle</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span></div>
+</div>
+
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_run_server</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the MCP server (internal).&quot;&quot;&quot;</span>
+    <span class="n">server</span> <span class="o">=</span> <span class="n">CaptureServer</span><span class="p">()</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">stdio_server</span><span class="p">()</span> <span class="k">as</span> <span class="p">(</span><span class="n">read_stream</span><span class="p">,</span> <span class="n">write_stream</span><span class="p">):</span>
+        <span class="k">await</span> <span class="n">server</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="n">read_stream</span><span class="p">,</span>
+            <span class="n">write_stream</span><span class="p">,</span>
+            <span class="n">InitializationOptions</span><span class="p">(</span>
+                <span class="n">server_name</span><span class="o">=</span><span class="s2">&quot;scitex-capture&quot;</span><span class="p">,</span>
+                <span class="n">server_version</span><span class="o">=</span><span class="s2">&quot;0.2.1&quot;</span><span class="p">,</span>
+                <span class="n">capabilities</span><span class="o">=</span><span class="n">server</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span>
+                    <span class="n">notification_options</span><span class="o">=</span><span class="n">NotificationOptions</span><span class="p">(),</span>
+                    <span class="n">experimental_capabilities</span><span class="o">=</span><span class="p">{},</span>
+                <span class="p">),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../api/scitex_capture.mcp_server.html#scitex_capture.mcp_server.main">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main entry point for the MCP server.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">MCP_AVAILABLE</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MCP Server &#39;scitex-capture&#39; requires the &#39;mcp&#39; package.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Install with:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  pip install mcp&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Or install scitex with MCP support:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  pip install scitex[mcp]&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">_run_server</span><span class="p">())</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+
+<span class="c1"># EOF</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yusuke Watanabe.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
