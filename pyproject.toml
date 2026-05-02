@@ -19,6 +19,7 @@ classifiers = [
 ]
 dependencies = [
     "Pillow",
+    "click>=8.0",
     "mss",
     "scitex",
 ]
@@ -56,7 +57,7 @@ Repository = "https://github.com/ywatanabe1989/scitex-capture"
 Documentation = "https://scitex-capture.readthedocs.io"
 
 [project.scripts]
-scitex-capture = "scitex_capture.cli:main"
+scitex-capture = "scitex_capture.cli:cli_entrypoint"
 
 [tool.setuptools.packages.find]
 where = ["src"]
