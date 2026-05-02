@@ -68,7 +68,7 @@
 <li class="toctree-l2"><a class="reference internal" href="scitex_capture.html#scitex_capture.create_gif_from_latest_session"><code class="docutils literal notranslate"><span class="pre">create_gif_from_latest_session()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="scitex_capture.capture.html">scitex_capture.capture</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">scitex_capture.cli</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#scitex_capture.cli.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_capture.cli.cli_entrypoint"><code class="docutils literal notranslate"><span class="pre">cli_entrypoint()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="scitex_capture.gif.html">scitex_capture.gif</a></li>
@@ -107,18 +107,20 @@
              
   <section id="module-scitex_capture.cli">
 <span id="scitex-capture-cli"></span><h1>scitex_capture.cli<a class="headerlink" href="#module-scitex_capture.cli" title="Link to this heading"></a></h1>
+<p>scitex-capture CLI — AI’s Camera (Click).</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#scitex_capture.cli.main" title="scitex_capture.cli.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>()</p></td>
-<td><p>Main CLI entry point.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#scitex_capture.cli.cli_entrypoint" title="scitex_capture.cli.cli_entrypoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cli_entrypoint</span></code></a>()</p></td>
+<td><p>Console-script entry — preprocess argv so <code class="docutils literal notranslate"><span class="pre">scitex-capture</span> <span class="pre">&lt;MESSAGE&gt;</span> <span class="pre">--flag</span></code> works, then hand off to Click.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py function">
-<dt class="sig sig-object py" id="scitex_capture.cli.main">
-<span class="sig-prename descclassname"><span class="pre">scitex_capture.cli.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_capture/cli.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_capture.cli.main" title="Link to this definition"></a></dt>
-<dd><p>Main CLI entry point.</p>
+<dt class="sig sig-object py" id="scitex_capture.cli.cli_entrypoint">
+<span class="sig-prename descclassname"><span class="pre">scitex_capture.cli.</span></span><span class="sig-name descname"><span class="pre">cli_entrypoint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_capture/cli.html#cli_entrypoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_capture.cli.cli_entrypoint" title="Link to this definition"></a></dt>
+<dd><p>Console-script entry — preprocess argv so <code class="docutils literal notranslate"><span class="pre">scitex-capture</span>
+<span class="pre">&lt;MESSAGE&gt;</span> <span class="pre">--flag</span></code> works, then hand off to Click.</p>
 </dd></dl>
 
 </section>

@@ -8,5 +8,5 @@ scitex\_capture.cli
 
    .. autosummary::
    
-      main
+      cli_entrypoint
    
