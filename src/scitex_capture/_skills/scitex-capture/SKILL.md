@@ -1,16 +1,17 @@
 ---
 name: scitex-capture
-description: AI's camera — screen capture optimized for WSL/Windows. `capture(monitor=0)` grabs a single screenshot; `monitor(interval=10, duration=300)` runs a continuous capture loop. JPEG-compressed, multi-monitor aware. Drop-in replacement for `subprocess.run(['screencapture', ...])` shells out and `pyautogui.screenshot()` calls that silently fail on WSL.
+description: |
+  [WHAT] AI's camera — screen capture optimized for WSL/Windows.
+  [WHEN] `capture(monitor=0)` grabs a single screenshot; `monitor(interval=10, duration=300)` runs a continuous capture loop.
+  [HOW] JPEG-compressed, multi-monitor aware. Drop-in replacement for `subprocess.run(['screencapture', ...])` shells out and `pyautogui.screenshot()` calls that silently fail on WSL.
+tags: [scitex-capture]
 primary_interface: python
 interfaces:
   python: 3
   cli: 1
   mcp: 0
   skills: 2
-  hook: 0
   http: 0
-canonical-location: scitex-capture/src/scitex_capture/_skills/scitex-capture/SKILL.md
-tags: [scitex-capture, scitex-package]
 ---
 
 > **Interfaces:** Python ⭐⭐⭐ · CLI ⭐ · MCP — · Skills ⭐⭐ · Hook — · HTTP —
