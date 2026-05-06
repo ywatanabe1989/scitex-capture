@@ -305,9 +305,12 @@
         <span class="p">)</span>
         <span class="k">return</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">yes</span><span class="p">:</span>
-        <span class="n">click</span><span class="o">.</span><span class="n">confirm</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Start monitoring (interval=</span><span class="si">{</span><span class="n">interval</span><span class="si">}</span><span class="s2">s, foreground)?&quot;</span><span class="p">,</span> <span class="n">abort</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span>
+            <span class="s2">&quot;Refusing to start monitor without --yes/-y &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;(interval=</span><span class="si">{</span><span class="n">interval</span><span class="si">}</span><span class="s2">s, foreground).&quot;</span><span class="p">,</span>
+            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\U0001f4f8</span><span class="s2"> Starting monitoring (interval: </span><span class="si">{</span><span class="n">interval</span><span class="si">}</span><span class="s2">s)...&quot;</span><span class="p">)</span>
     <span class="n">capture</span><span class="o">.</span><span class="n">start</span><span class="p">(</span>
         <span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span>
@@ -357,7 +360,8 @@
         <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;Dry-run: would call capture.stop().&quot;</span><span class="p">)</span>
         <span class="k">return</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">yes</span><span class="p">:</span>
-        <span class="n">click</span><span class="o">.</span><span class="n">confirm</span><span class="p">(</span><span class="s2">&quot;Stop the running monitor?&quot;</span><span class="p">,</span> <span class="n">abort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;Refusing to stop monitor without --yes/-y.&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">capture</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\u2705</span><span class="s2"> Monitoring stopped&quot;</span><span class="p">)</span>
 
@@ -415,7 +419,8 @@
         <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;Dry-run: would launch scitex_capture.mcp_server.main()&quot;</span><span class="p">)</span>
         <span class="k">return</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">yes</span><span class="p">:</span>
-        <span class="n">click</span><span class="o">.</span><span class="n">confirm</span><span class="p">(</span><span class="s2">&quot;Start the MCP server (foreground)?&quot;</span><span class="p">,</span> <span class="n">abort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;Refusing to start MCP server without --yes/-y.&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\U0001f916</span><span class="s2"> Starting scitex.capture MCP server...&quot;</span><span class="p">)</span>
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;Add to Claude Code settings:&quot;</span><span class="p">)</span>
     <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">)</span>
