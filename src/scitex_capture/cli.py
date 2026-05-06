@@ -227,9 +227,12 @@ def start_monitor(interval, monitor, all_monitors, quiet, yes, dry_run):
         )
         return
     if not yes:
-        click.confirm(
-            f"Start monitoring (interval={interval}s, foreground)?", abort=True
+        click.echo(
+            "Refusing to start monitor without --yes/-y "
+            f"(interval={interval}s, foreground).",
+            err=True,
         )
+        sys.exit(2)
     click.echo(f"\U0001f4f8 Starting monitoring (interval: {interval}s)...")
     capture.start(
         interval=interval,
@@ -279,7 +282,8 @@ def stop_monitor(yes, dry_run):
         click.echo("Dry-run: would call capture.stop().")
         return
     if not yes:
-        click.confirm("Stop the running monitor?", abort=True)
+        click.echo("Refusing to stop monitor without --yes/-y.", err=True)
+        sys.exit(2)
     capture.stop()
     click.echo("\u2705 Monitoring stopped")
 
@@ -337,7 +341,8 @@ def mcp_start(yes, dry_run):
         click.echo("Dry-run: would launch scitex_capture.mcp_server.main()")
         return
     if not yes:
-        click.confirm("Start the MCP server (foreground)?", abort=True)
+        click.echo("Refusing to start MCP server without --yes/-y.", err=True)
+        sys.exit(2)
     click.echo("\U0001f916 Starting scitex.capture MCP server...")
     click.echo("Add to Claude Code settings:")
     click.echo("{")

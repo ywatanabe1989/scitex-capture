@@ -21,7 +21,6 @@ dependencies = [
     "Pillow",
     "click>=8.0",
     "mss",
-    "scitex",
 ]
 
 [project.optional-dependencies]
