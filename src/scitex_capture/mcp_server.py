@@ -54,7 +54,7 @@ except ImportError:
 import os
 import shutil
 
-from scitex import capture
+import scitex_capture as capture
 
 # Use SCITEX_DIR environment variable if set, otherwise default to ~/.scitex
 SCITEX_BASE_DIR = Path(os.getenv("SCITEX_DIR", Path.home() / ".scitex"))

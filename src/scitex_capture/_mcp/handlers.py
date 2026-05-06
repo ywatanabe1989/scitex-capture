@@ -54,7 +54,7 @@ async def capture_screenshot_handler(
 ) -> dict:
     """Capture screenshot with optional overlays."""
     try:
-        from scitex import capture
+        import scitex_capture as capture
 
         loop = asyncio.get_event_loop()
 
@@ -107,7 +107,7 @@ async def start_monitoring_handler(
         return {"success": False, "message": "Monitoring already active"}
 
     try:
-        from scitex import capture
+        import scitex_capture as capture
 
         loop = asyncio.get_event_loop()
 
@@ -144,7 +144,7 @@ async def stop_monitoring_handler() -> dict:
         return {"success": False, "message": "Monitoring not active"}
 
     try:
-        from scitex import capture
+        import scitex_capture as capture
 
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(None, capture.stop)
@@ -378,7 +378,7 @@ async def list_sessions_handler(limit: int = 10) -> dict:
 async def get_info_handler() -> dict:
     """Get monitor and window information."""
     try:
-        from scitex import capture
+        import scitex_capture as capture
 
         loop = asyncio.get_event_loop()
         info = await loop.run_in_executor(None, capture.get_info)
@@ -394,7 +394,7 @@ async def get_info_handler() -> dict:
 async def list_windows_handler() -> dict:
     """List all visible windows."""
     try:
-        from scitex import capture
+        import scitex_capture as capture
 
         loop = asyncio.get_event_loop()
         info = await loop.run_in_executor(None, capture.get_info)
@@ -419,7 +419,7 @@ async def capture_window_handler(
 ) -> dict:
     """Capture a specific window by handle."""
     try:
-        from scitex import capture
+        import scitex_capture as capture
 
         loop = asyncio.get_event_loop()
         path = await loop.run_in_executor(

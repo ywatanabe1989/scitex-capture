@@ -12,7 +12,7 @@ Features:
 - Thread-safe operation
 
 Usage:
-    from scitex import capture
+    import scitex_capture as capture
 
     # Single screenshot
     capture.snap("debug message")
