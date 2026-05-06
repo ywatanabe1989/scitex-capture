@@ -32,12 +32,13 @@ playwright = [
     "playwright>=1.40.0",
 ]
 dev = [
+    "mcp>=1.0.0",
     "numpy",
+    "playwright>=1.40.0",
     "pytest",
     "pytest-asyncio",
     "pytest-cov",
     "ruff",
-    "mcp>=1.0.0",
 ]
 docs = [
     "sphinx>=7.0",
