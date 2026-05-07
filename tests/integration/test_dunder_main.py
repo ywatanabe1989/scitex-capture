@@ -10,7 +10,7 @@ Tests the entry point for python -m scitex.capture:
 import os
 import subprocess
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -66,16 +66,13 @@ class TestModuleExecution:
                 assert callable(__main__.main)
 
     def test_module_returns_main_exit_code(self):
-        """Test module passes main's return value to sys.exit."""
-        # Test by running actual subprocess with mocked capture
+        """`python -m scitex_capture --help` exits 0 (sys.exit forwards Click's exit)."""
         result = subprocess.run(
-            [sys.executable, "-m", "scitex_capture", "--stop"],
+            [sys.executable, "-m", "scitex_capture", "--help"],
             capture_output=True,
             text=True,
             timeout=10,
         )
-
-        # --stop should return 0 (success)
         assert result.returncode == 0
 
 
@@ -83,45 +80,36 @@ class TestModuleIntegration:
     """Test module integration with CLI."""
 
     def test_help_output_contains_capture_commands(self):
-        """Test help output contains expected capture commands."""
+        """Help output mentions the canonical subcommand names (post-Click refactor)."""
         result = subprocess.run(
             [sys.executable, "-m", "scitex_capture", "--help"],
             capture_output=True,
             text=True,
             timeout=10,
         )
-
-        # Check for common capture-related options
         help_text = result.stdout.lower()
-        assert "--list" in help_text or "list" in help_text
-        assert "--info" in help_text or "info" in help_text
+        assert "list-windows" in help_text
+        assert "show-info" in help_text
 
-    def test_list_action_via_module(self):
-        """Test --list action works via module."""
-        with patch("scitex_capture.get_info") as mock_info:
-            mock_info.return_value = {"Windows": {"Details": []}}
-
-            result = subprocess.run(
-                [sys.executable, "-m", "scitex_capture", "--list"],
-                capture_output=True,
-                text=True,
-                timeout=10,
-            )
-
-            # May succeed or fail depending on WSL state, but should not crash
-            assert result.returncode in [0, 1]
-
-    def test_info_action_via_module(self):
-        """Test --info action works via module."""
+    def test_list_windows_help_via_module(self):
+        """`list-windows --help` exits 0 — flag-shape was renamed to subcommand."""
         result = subprocess.run(
-            [sys.executable, "-m", "scitex_capture", "--info"],
+            [sys.executable, "-m", "scitex_capture", "list-windows", "--help"],
             capture_output=True,
             text=True,
             timeout=10,
         )
+        assert result.returncode == 0
 
-        # May succeed or fail depending on WSL state, but should not crash
-        assert result.returncode in [0, 1]
+    def test_show_info_help_via_module(self):
+        """`show-info --help` exits 0 — flag-shape was renamed to subcommand."""
+        result = subprocess.run(
+            [sys.executable, "-m", "scitex_capture", "show-info", "--help"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        assert result.returncode == 0
 
 
 class TestModuleAttributes:
