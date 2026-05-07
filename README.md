@@ -26,6 +26,23 @@
 
 ---
 
+## Architecture
+
+```
+scitex-capture/
+├── src/scitex_capture/
+│   ├── __init__.py              # snap, start, stop, gif, get_info
+│   ├── _snap.py                 # one-shot screenshot (mss + Pillow)
+│   ├── _session.py              # interval capture session manager
+│   ├── _gif.py                  # multi-frame -> animated GIF / grid
+│   ├── _info.py                 # monitor + cursor introspection
+│   ├── _wsl.py                  # WSL -> Windows host bridge
+│   ├── _cli/                    # scitex-capture entrypoint
+│   ├── _mcp_tools/              # MCP server (opt-in)
+│   └── playwright/              # browser-side capture (opt-in)
+└── tests/                       # 146/146 pass
+```
+
 ## Installation
 
 ```bash
@@ -78,6 +95,25 @@ scitex-capture gif <session-id>
 ```
 
 </details>
+
+## Demo
+
+```mermaid
+sequenceDiagram
+    participant U as user / agent
+    participant C as scitex_capture
+    participant M as mss + Pillow
+    participant F as filesystem
+    U->>C: cap.start(interval=2)
+    loop every 2s
+        C->>M: grab frame
+        M-->>C: PNG bytes
+        C->>F: write frame_NNN.png
+    end
+    U->>C: cap.stop(session_id)
+    U->>C: cap.gif(session_id)
+    C-->>F: session.gif (animated)
+```
 
 ## Status
 
