@@ -13,7 +13,7 @@ as a silent ModuleNotFoundError when an end user runs the CLI.
 import pytest
 
 # ===== AUTO-GENERATED: cross-package imports =====
-CROSS_PACKAGE_IMPORTS: list[str] = [
+CROSS_PACKAGE_IMPORTS = [
     "scitex_dev._cli._completion",
 ]
 # ===== END AUTO-GENERATED =====
