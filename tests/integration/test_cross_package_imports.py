@@ -14,10 +14,7 @@ import pytest
 
 # ===== AUTO-GENERATED: cross-package imports =====
 CROSS_PACKAGE_IMPORTS: list[str] = [
-    # scitex-capture has no module-level umbrella imports in src/.
-    # README docstrings reference `from scitex import capture` for
-    # umbrella-side users, but that's documentation, not a runtime
-    # dependency.
+    "scitex_dev._cli._completion",
 ]
 # ===== END AUTO-GENERATED =====
 
