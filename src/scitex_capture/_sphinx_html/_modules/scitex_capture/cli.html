@@ -515,6 +515,97 @@
     <span class="k">return</span> <span class="n">options</span> <span class="o">+</span> <span class="n">rest</span> <span class="o">+</span> <span class="p">[</span><span class="n">positional</span><span class="p">]</span>
 
 
+<span class="c1"># ----- audit-cli §1a / §4 wiring -------------------------------------------</span>
+<span class="c1"># §1a: skills group (list / get / install) — required because the package</span>
+<span class="c1"># ships _skills/scitex-capture/.</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">&quot;skills&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">skills_group</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Browse / install the agent-facing skills bundled with scitex-capture.&quot;&quot;&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_skills_root</span><span class="p">():</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+    <span class="kn">import</span><span class="w"> </span><span class="nn">scitex_capture</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_pkg</span>
+
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">_pkg</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;_skills&quot;</span> <span class="o">/</span> <span class="s2">&quot;scitex-capture&quot;</span>
+
+
+<span class="nd">@skills_group</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;list&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--json&quot;</span><span class="p">,</span> <span class="s2">&quot;as_json&quot;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_skills_list</span><span class="p">(</span><span class="n">as_json</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List bundled skill files.&quot;&quot;&quot;</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">_skills_root</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">as_json</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">&quot;skills&quot;</span><span class="p">:</span> <span class="p">[]}))</span>
+        <span class="k">return</span>
+    <span class="n">skills</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.md&quot;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">as_json</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">&quot;skills&quot;</span><span class="p">:</span> <span class="n">skills</span><span class="p">},</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">skills</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+
+<span class="nd">@skills_group</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_skills_get</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Print one bundled skill (relative path under _skills/scitex-capture/).&quot;&quot;&quot;</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">_skills_root</span><span class="p">()</span> <span class="o">/</span> <span class="n">name</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;error: no such skill: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+
+
+<span class="nd">@skills_group</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;install&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--dest&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;~/.claude/skills/scitex-capture&quot;</span><span class="p">,</span>
+    <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Where to copy the skills tree.&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_skills_install</span><span class="p">(</span><span class="n">dest</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Copy the bundled skills tree to ``dest`` (default: ~/.claude/skills/...).&quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+    <span class="n">src</span> <span class="o">=</span> <span class="n">_skills_root</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">src</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;error: no _skills/scitex-capture/ to install&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="n">target</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">src</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.md&quot;</span><span class="p">):</span>
+        <span class="n">rel</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">target</span> <span class="o">/</span> <span class="n">rel</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;installed → </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="n">main</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">skills_group</span><span class="p">)</span>
+
+<span class="c1"># §1a: install-shell-completion + print-shell-completion</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scitex_dev._cli._completion</span><span class="w"> </span><span class="kn">import</span> <span class="n">attach_shell_completion</span>
+
+    <span class="n">attach_shell_completion</span><span class="p">(</span><span class="n">main</span><span class="p">,</span> <span class="n">prog_name</span><span class="o">=</span><span class="s2">&quot;scitex-capture&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="c1"># §4: prepend canonical &quot;&lt;cli&gt; (vX.Y.Z) — &lt;description&gt;&quot; to root --help.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">importlib.metadata</span><span class="w"> </span><span class="kn">import</span> <span class="n">version</span> <span class="k">as</span> <span class="n">_v</span>
+
+    <span class="n">main</span><span class="o">.</span><span class="n">help</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;scitex-capture (v</span><span class="si">{</span><span class="n">_v</span><span class="p">(</span><span class="s1">&#39;scitex-capture&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">) — &quot;</span> <span class="o">+</span> <span class="p">(</span><span class="n">main</span><span class="o">.</span><span class="n">help</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
+    <span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
 <div class="viewcode-block" id="cli_entrypoint">
 <a class="viewcode-back" href="../../api/scitex_capture.cli.html#scitex_capture.cli.cli_entrypoint">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">cli_entrypoint</span><span class="p">():</span>
