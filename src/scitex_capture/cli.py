@@ -437,6 +437,97 @@ def _reorder_argv(argv):
     return options + rest + [positional]
 
 
+# ----- audit-cli §1a / §4 wiring -------------------------------------------
+# §1a: skills group (list / get / install) — required because the package
+# ships _skills/scitex-capture/.
+@click.group("skills")
+def skills_group():
+    """Browse / install the agent-facing skills bundled with scitex-capture."""
+
+
+def _skills_root():
+    from pathlib import Path
+
+    import scitex_capture as _pkg
+
+    return Path(_pkg.__file__).parent / "_skills" / "scitex-capture"
+
+
+@skills_group.command("list")
+@click.option("--json", "as_json", is_flag=True, default=False)
+def _skills_list(as_json):
+    """List bundled skill files."""
+    root = _skills_root()
+    if not root.is_dir():
+        if as_json:
+            click.echo(json.dumps({"skills": []}))
+        return
+    skills = sorted(p.relative_to(root).as_posix() for p in root.rglob("*.md"))
+    if as_json:
+        click.echo(json.dumps({"skills": skills}, indent=2))
+    else:
+        for s in skills:
+            click.echo(s)
+
+
+@skills_group.command("get")
+@click.argument("name")
+def _skills_get(name):
+    """Print one bundled skill (relative path under _skills/scitex-capture/)."""
+    p = _skills_root() / name
+    if not p.is_file():
+        click.echo(f"error: no such skill: {name}", err=True)
+        sys.exit(1)
+    click.echo(p.read_text())
+
+
+@skills_group.command("install")
+@click.option(
+    "--dest",
+    default="~/.claude/skills/scitex-capture",
+    show_default=True,
+    help="Where to copy the skills tree.",
+)
+def _skills_install(dest):
+    """Copy the bundled skills tree to ``dest`` (default: ~/.claude/skills/...)."""
+    import shutil
+    from pathlib import Path
+
+    src = _skills_root()
+    if not src.is_dir():
+        click.echo("error: no _skills/scitex-capture/ to install", err=True)
+        sys.exit(1)
+    target = Path(dest).expanduser()
+    target.mkdir(parents=True, exist_ok=True)
+    for f in src.rglob("*.md"):
+        rel = f.relative_to(src)
+        out = target / rel
+        out.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(f, out)
+    click.echo(f"installed → {target}")
+
+
+main.add_command(skills_group)
+
+# §1a: install-shell-completion + print-shell-completion
+try:
+    from scitex_dev._cli._completion import attach_shell_completion
+
+    attach_shell_completion(main, prog_name="scitex-capture")
+except ImportError:
+    pass
+
+# §4: prepend canonical "<cli> (vX.Y.Z) — <description>" to root --help.
+try:
+    from importlib.metadata import version as _v
+
+    main.help = (
+        f"scitex-capture (v{_v('scitex-capture')}) — " + (main.help or "").lstrip()
+    )
+except Exception:
+    pass
+
+
 def cli_entrypoint():
     """Console-script entry — preprocess argv so ``scitex-capture
     <MESSAGE> --flag`` works, then hand off to Click."""
