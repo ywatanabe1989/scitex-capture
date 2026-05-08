@@ -456,7 +456,13 @@ def _skills_root():
 @skills_group.command("list")
 @click.option("--json", "as_json", is_flag=True, default=False)
 def _skills_list(as_json):
-    """List bundled skill files."""
+    """List bundled skill files.
+
+    \b
+    Example:
+        $ scitex-capture skills list
+        $ scitex-capture skills list --json
+    """
     root = _skills_root()
     if not root.is_dir():
         if as_json:
@@ -472,13 +478,24 @@ def _skills_list(as_json):
 
 @skills_group.command("get")
 @click.argument("name")
-def _skills_get(name):
-    """Print one bundled skill (relative path under _skills/scitex-capture/)."""
+@click.option("--json", "as_json", is_flag=True, default=False)
+def _skills_get(name, as_json):
+    """Print one bundled skill (relative path under _skills/scitex-capture/).
+
+    \b
+    Example:
+        $ scitex-capture skills get SKILL.md
+        $ scitex-capture skills get SKILL.md --json
+    """
     p = _skills_root() / name
     if not p.is_file():
         click.echo(f"error: no such skill: {name}", err=True)
         sys.exit(1)
-    click.echo(p.read_text())
+    body = p.read_text()
+    if as_json:
+        click.echo(json.dumps({"name": name, "content": body}, indent=2))
+    else:
+        click.echo(body)
 
 
 @skills_group.command("install")
@@ -488,8 +505,22 @@ def _skills_get(name):
     show_default=True,
     help="Where to copy the skills tree.",
 )
-def _skills_install(dest):
-    """Copy the bundled skills tree to ``dest`` (default: ~/.claude/skills/...)."""
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Print the actions that would be taken without copying anything.",
+)
+@click.option("-y", "--yes", is_flag=True, default=False, help="Assume yes (no-op).")
+def _skills_install(dest, dry_run, yes):
+    """Copy the bundled skills tree to ``dest`` (default: ~/.claude/skills/...).
+
+    \b
+    Example:
+        $ scitex-capture skills install
+        $ scitex-capture skills install --dest ~/my-skills
+        $ scitex-capture skills install --dry-run
+    """
     import shutil
     from pathlib import Path
 
@@ -498,6 +529,12 @@ def _skills_install(dest):
         click.echo("error: no _skills/scitex-capture/ to install", err=True)
         sys.exit(1)
     target = Path(dest).expanduser()
+    if dry_run:
+        click.echo(f"[dry-run] would install → {target}")
+        for f in src.rglob("*.md"):
+            click.echo(f"[dry-run]   {f.relative_to(src)}")
+        return
+    _ = yes  # accepted for §2 conformance; install is non-interactive
     target.mkdir(parents=True, exist_ok=True)
     for f in src.rglob("*.md"):
         rel = f.relative_to(src)
