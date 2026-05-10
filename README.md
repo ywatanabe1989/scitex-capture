@@ -9,7 +9,7 @@
 <p align="center"><b>Session-based screen capture — single screenshots, multi-frame sessions → animated GIFs, grid overlays, monitor + cursor info. Optimised for WSL→Windows host and for AI agents that need a "what does my screen look like right now" tool.</b></p>
 
 <p align="center">
-  <a href="https://scitex-capture.readthedocs.io/">Full Documentation</a> · <code>pip install scitex-capture</code>
+  <a href="https://scitex-capture.readthedocs.io/">Full Documentation</a> · <code>uv pip install scitex-capture[all]</code>
 </p>
 
 <!-- scitex-badges:start -->
