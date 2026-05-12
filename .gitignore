@@ -18,3 +18,12 @@ docs/sphinx/_build/
 docs/sphinx/api/
 *.swp
 .DS_Store
+
+# Local state dir from scitex-dev / scitex-clew tooling. Use file-level
+# negations rather than directory-level ignore so we can track
+# .scitex/dev/config.yaml (project-scoped audit whitelist) but keep
+# the rest as local runtime state.
+.scitex/*
+!.scitex/dev/
+.scitex/dev/*
+!.scitex/dev/config.yaml

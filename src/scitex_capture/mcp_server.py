@@ -35,20 +35,34 @@ from datetime import datetime
 from pathlib import Path
 
 # Graceful MCP dependency handling
-try:
-    import mcp.types as types
-    from mcp.server import NotificationOptions, Server
-    from mcp.server.models import InitializationOptions
-    from mcp.server.stdio import stdio_server
+from scitex_dev import try_import_optional
 
-    MCP_AVAILABLE = True
-except ImportError:
-    MCP_AVAILABLE = False
-    types = None  # type: ignore
-    Server = None  # type: ignore
-    NotificationOptions = None  # type: ignore
-    InitializationOptions = None  # type: ignore
-    stdio_server = None  # type: ignore
+types = try_import_optional("mcp.types", extra="mcp", pkg="mcp")
+_mcp_server_mod = try_import_optional("mcp.server", extra="mcp", pkg="mcp")
+_mcp_models_mod = try_import_optional("mcp.server.models", extra="mcp", pkg="mcp")
+_mcp_stdio_mod = try_import_optional("mcp.server.stdio", extra="mcp", pkg="mcp")
+
+NotificationOptions = (
+    getattr(_mcp_server_mod, "NotificationOptions", None)
+    if _mcp_server_mod is not None
+    else None
+)
+Server = getattr(_mcp_server_mod, "Server", None) if _mcp_server_mod is not None else None
+InitializationOptions = (
+    getattr(_mcp_models_mod, "InitializationOptions", None)
+    if _mcp_models_mod is not None
+    else None
+)
+stdio_server = (
+    getattr(_mcp_stdio_mod, "stdio_server", None)
+    if _mcp_stdio_mod is not None
+    else None
+)
+
+MCP_AVAILABLE = all(
+    obj is not None
+    for obj in (types, Server, NotificationOptions, InitializationOptions, stdio_server)
+)
 
 # Directory configuration
 import os

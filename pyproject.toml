@@ -73,6 +73,11 @@ scitex-capture = "scitex_capture"
 testpaths = ["tests"]
 addopts = ["--disable-warnings"]
 
+[tool.coverage.run]
+parallel = true
+source = ["scitex_capture"]
+concurrency = ["multiprocessing", "thread"]
+
 [tool.ruff]
 target-version = "py39"
 line-length = 88

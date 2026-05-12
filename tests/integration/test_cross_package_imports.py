@@ -14,6 +14,7 @@ import pytest
 
 # ===== AUTO-GENERATED: cross-package imports =====
 CROSS_PACKAGE_IMPORTS = [
+    "scitex_dev",
     "scitex_dev._cli._completion",
 ]
 # ===== END AUTO-GENERATED =====
