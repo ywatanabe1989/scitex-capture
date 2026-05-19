@@ -66,6 +66,11 @@
 <li class="toctree-l2"><a class="reference internal" href="scitex_capture.html#scitex_capture.create_gif_from_files"><code class="docutils literal notranslate"><span class="pre">create_gif_from_files()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="scitex_capture.html#scitex_capture.create_gif_from_pattern"><code class="docutils literal notranslate"><span class="pre">create_gif_from_pattern()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="scitex_capture.html#scitex_capture.create_gif_from_latest_session"><code class="docutils literal notranslate"><span class="pre">create_gif_from_latest_session()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="scitex_capture.html#scitex_capture.get_capture_root"><code class="docutils literal notranslate"><span class="pre">get_capture_root()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="scitex_capture.html#scitex_capture.get_capture_dir"><code class="docutils literal notranslate"><span class="pre">get_capture_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="scitex_capture.html#scitex_capture.get_runtime_dir"><code class="docutils literal notranslate"><span class="pre">get_runtime_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="scitex_capture.html#scitex_capture.get_screenshots_dir"><code class="docutils literal notranslate"><span class="pre">get_screenshots_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="scitex_capture.html#scitex_capture.get_gifs_dir"><code class="docutils literal notranslate"><span class="pre">get_gifs_dir()</span></code></a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">scitex_capture.capture</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#scitex_capture.capture"><code class="docutils literal notranslate"><span class="pre">capture()</span></code></a></li>
 </ul>
@@ -114,7 +119,9 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Message to include in filename</p></li>
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Output path (default: ~/.scitex/capture/)</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Output path. Defaults to the canonical
+<code class="docutils literal notranslate"><span class="pre">$SCITEX_DIR/capture/runtime/screenshots/</span></code> directory when
+unset.</p></li>
 <li><p><strong>quality</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – JPEG quality (1-100)</p></li>
 <li><p><strong>all</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Capture all monitors</p></li>
 <li><p><strong>app</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – App name to capture (e.g., “chrome”, “code”)</p></li>

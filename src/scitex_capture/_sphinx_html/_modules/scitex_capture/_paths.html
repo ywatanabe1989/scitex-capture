@@ -1,0 +1,221 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scitex_capture._paths &mdash; scitex-capture 0.1.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=360bc84d"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            scitex-capture
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/scitex_capture.html">scitex_capture</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">scitex-capture</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../scitex_capture.html">scitex_capture</a></li>
+      <li class="breadcrumb-item active">scitex_capture._paths</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scitex_capture._paths</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># File: src/scitex_capture/_paths.py</span>
+<span class="c1"># ----------------------------------------</span>
+<span class="sd">&quot;&quot;&quot;Canonical filesystem layout for scitex-capture local state.</span>
+
+<span class="sd">Everything that scitex-capture writes lives under</span>
+<span class="sd">``$SCITEX_DIR/capture/runtime/&lt;category&gt;/`` (defaults to</span>
+<span class="sd">``~/.scitex/capture/runtime/&lt;category&gt;/``). The package root</span>
+<span class="sd">``$SCITEX_DIR/capture/`` itself is reserved for tracked declarative</span>
+<span class="sd">inputs that the operator&#39;s dotfiles repo commits — see</span>
+<span class="sd">``scitex_dev._skills.general.01_ecosystem_06_local-state-directories``.</span>
+
+<span class="sd">Public helpers below return the *logical* directory each consumer</span>
+<span class="sd">asks for (e.g. ``get_capture_dir()`` still means &quot;where screenshots</span>
+<span class="sd">go&quot;); only the on-disk layout — namely the extra ``runtime/&lt;cat&gt;/``</span>
+<span class="sd">segment — changed.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;get_capture_root&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_runtime_dir&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_capture_dir&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_screenshots_dir&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_gifs_dir&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_tmp_dir&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="c1"># Categories carved out under runtime/. Keep this list narrow and</span>
+<span class="c1"># deliberate; each value is a directory name under runtime/.</span>
+<span class="n">_SCREENSHOTS</span> <span class="o">=</span> <span class="s2">&quot;screenshots&quot;</span>
+<span class="n">_GIFS</span> <span class="o">=</span> <span class="s2">&quot;gifs&quot;</span>
+<span class="n">_TMP</span> <span class="o">=</span> <span class="s2">&quot;tmp&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_scitex_base</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return ``$SCITEX_DIR`` if set, otherwise ``~/.scitex``.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SCITEX_DIR&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.scitex&quot;</span><span class="p">)))</span>
+
+
+<div class="viewcode-block" id="get_capture_root">
+<a class="viewcode-back" href="../../api/scitex_capture.html#scitex_capture.get_capture_root">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_capture_root</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the scitex-capture package root, ``$SCITEX_DIR/capture``.</span>
+
+<span class="sd">    The root itself is reserved for tracked inputs (config.yaml,</span>
+<span class="sd">    etc.). All writes must go through ``get_runtime_dir(...)``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_scitex_base</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;capture&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="get_runtime_dir">
+<a class="viewcode-back" href="../../api/scitex_capture.html#scitex_capture.get_runtime_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_runtime_dir</span><span class="p">(</span><span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return ``$SCITEX_DIR/capture/runtime[/&lt;category&gt;]``.</span>
+
+<span class="sd">    The directory is created on demand so callers don&#39;t have to</span>
+<span class="sd">    ``mkdir`` themselves (lazy mkdir is the package convention; see</span>
+<span class="sd">    the local-state-directories skill §3.5).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">runtime</span> <span class="o">=</span> <span class="n">get_capture_root</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;runtime&quot;</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">runtime</span> <span class="k">if</span> <span class="n">category</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">runtime</span> <span class="o">/</span> <span class="n">category</span>
+    <span class="n">target</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">target</span></div>
+
+
+
+<div class="viewcode-block" id="get_capture_dir">
+<a class="viewcode-back" href="../../api/scitex_capture.html#scitex_capture.get_capture_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_capture_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the directory screenshots are written to.</span>
+
+<span class="sd">    Logical name preserved for back-compat with the MCP server and</span>
+<span class="sd">    handler code that previously returned ``~/.scitex/capture`` —</span>
+<span class="sd">    the on-disk layout moved to ``runtime/screenshots/``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">get_screenshots_dir</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="get_screenshots_dir">
+<a class="viewcode-back" href="../../api/scitex_capture.html#scitex_capture.get_screenshots_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_screenshots_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return ``runtime/screenshots/`` — single shots and monitor frames.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">get_runtime_dir</span><span class="p">(</span><span class="n">_SCREENSHOTS</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_gifs_dir">
+<a class="viewcode-back" href="../../api/scitex_capture.html#scitex_capture.get_gifs_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_gifs_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return ``runtime/gifs/`` — assembled animated outputs.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">get_runtime_dir</span><span class="p">(</span><span class="n">_GIFS</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_tmp_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return ``runtime/tmp/`` — replaces ``/tmp/scitex_capture_*``.</span>
+
+<span class="sd">    The local-state-directories skill §5 forbids ``/tmp/scitex-&lt;pkg&gt;-*``</span>
+<span class="sd">    paths because they fragment the layout and break ``SCITEX_DIR``</span>
+<span class="sd">    relocation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">get_runtime_dir</span><span class="p">(</span><span class="n">_TMP</span><span class="p">)</span>
+
+
+<span class="c1"># EOF</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yusuke Watanabe.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

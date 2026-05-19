@@ -63,6 +63,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#scitex_capture.create_gif_from_files"><code class="docutils literal notranslate"><span class="pre">create_gif_from_files()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scitex_capture.create_gif_from_pattern"><code class="docutils literal notranslate"><span class="pre">create_gif_from_pattern()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scitex_capture.create_gif_from_latest_session"><code class="docutils literal notranslate"><span class="pre">create_gif_from_latest_session()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scitex_capture.get_capture_root"><code class="docutils literal notranslate"><span class="pre">get_capture_root()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scitex_capture.get_capture_dir"><code class="docutils literal notranslate"><span class="pre">get_capture_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scitex_capture.get_runtime_dir"><code class="docutils literal notranslate"><span class="pre">get_runtime_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scitex_capture.get_screenshots_dir"><code class="docutils literal notranslate"><span class="pre">get_screenshots_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scitex_capture.get_gifs_dir"><code class="docutils literal notranslate"><span class="pre">get_gifs_dir()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -125,7 +130,9 @@ capture.stop()</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Message to include in filename</p></li>
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Output path (default: ~/.scitex/capture/)</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Output path. Defaults to the canonical
+<code class="docutils literal notranslate"><span class="pre">$SCITEX_DIR/capture/runtime/screenshots/</span></code> directory when
+unset.</p></li>
 <li><p><strong>quality</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – JPEG quality (1-100)</p></li>
 <li><p><strong>all</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Capture all monitors</p></li>
 <li><p><strong>app</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – App name to capture (e.g., “chrome”, “code”)</p></li>
@@ -162,7 +169,9 @@ capture.stop()</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Message to include in filename</p></li>
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Output path (default: ~/.scitex/capture/)</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Output path. Defaults to the canonical
+<code class="docutils literal notranslate"><span class="pre">$SCITEX_DIR/capture/runtime/screenshots/</span></code> directory when
+unset.</p></li>
 <li><p><strong>quality</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – JPEG quality (1-100)</p></li>
 <li><p><strong>all</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Capture all monitors</p></li>
 <li><p><strong>app</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – App name to capture (e.g., “chrome”, “code”)</p></li>
@@ -199,7 +208,9 @@ capture.stop()</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Message to include in filename</p></li>
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Output path (default: ~/.scitex/capture/)</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Output path. Defaults to the canonical
+<code class="docutils literal notranslate"><span class="pre">$SCITEX_DIR/capture/runtime/screenshots/</span></code> directory when
+unset.</p></li>
 <li><p><strong>quality</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – JPEG quality (1-100)</p></li>
 <li><p><strong>all</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Capture all monitors</p></li>
 <li><p><strong>app</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – App name to capture (e.g., “chrome”, “code”)</p></li>
@@ -236,7 +247,9 @@ capture.stop()</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>message</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Message to include in filename</p></li>
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Output path (default: ~/.scitex/capture/)</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Output path. Defaults to the canonical
+<code class="docutils literal notranslate"><span class="pre">$SCITEX_DIR/capture/runtime/screenshots/</span></code> directory when
+unset.</p></li>
 <li><p><strong>quality</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – JPEG quality (1-100)</p></li>
 <li><p><strong>all</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Capture all monitors</p></li>
 <li><p><strong>app</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – App name to capture (e.g., “chrome”, “code”)</p></li>
@@ -267,12 +280,14 @@ capture.stop()</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="scitex_capture.start">
-<span class="sig-prename descclassname"><span class="pre">scitex_capture.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'~/.scitex/capture/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jpeg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_capture</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capture_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scitex_capture.start" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">scitex_capture.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jpeg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_capture</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capture_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scitex_capture.start" title="Link to this definition"></a></dt>
 <dd><p>Start continuous screenshot monitoring.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>output_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Directory for screenshots (default: ~/.scitex/capture/)</p></li>
+<li><p><strong>output_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Directory for screenshots. Defaults to the canonical
+<code class="docutils literal notranslate"><span class="pre">$SCITEX_DIR/capture/runtime/screenshots/</span></code> location when
+unset.</p></li>
 <li><p><strong>interval</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Seconds between captures</p></li>
 <li><p><strong>jpeg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Use JPEG compression</p></li>
 <li><p><strong>quality</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – JPEG quality (1-100)</p></li>
@@ -407,6 +422,69 @@ capture.stop()</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_capture.get_capture_root">
+<span class="sig-prename descclassname"><span class="pre">scitex_capture.</span></span><span class="sig-name descname"><span class="pre">get_capture_root</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scitex_capture/_paths.html#get_capture_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_capture.get_capture_root" title="Link to this definition"></a></dt>
+<dd><p>Return the scitex-capture package root, <code class="docutils literal notranslate"><span class="pre">$SCITEX_DIR/capture</span></code>.</p>
+<p>The root itself is reserved for tracked inputs (config.yaml,
+etc.). All writes must go through <code class="docutils literal notranslate"><span class="pre">get_runtime_dir(...)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_capture.get_capture_dir">
+<span class="sig-prename descclassname"><span class="pre">scitex_capture.</span></span><span class="sig-name descname"><span class="pre">get_capture_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scitex_capture/_paths.html#get_capture_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_capture.get_capture_dir" title="Link to this definition"></a></dt>
+<dd><p>Return the directory screenshots are written to.</p>
+<p>Logical name preserved for back-compat with the MCP server and
+handler code that previously returned <code class="docutils literal notranslate"><span class="pre">~/.scitex/capture</span></code> —
+the on-disk layout moved to <code class="docutils literal notranslate"><span class="pre">runtime/screenshots/</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_capture.get_runtime_dir">
+<span class="sig-prename descclassname"><span class="pre">scitex_capture.</span></span><span class="sig-name descname"><span class="pre">get_runtime_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scitex_capture/_paths.html#get_runtime_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_capture.get_runtime_dir" title="Link to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">$SCITEX_DIR/capture/runtime[/&lt;category&gt;]</span></code>.</p>
+<p>The directory is created on demand so callers don’t have to
+<code class="docutils literal notranslate"><span class="pre">mkdir</span></code> themselves (lazy mkdir is the package convention; see
+the local-state-directories skill §3.5).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_capture.get_screenshots_dir">
+<span class="sig-prename descclassname"><span class="pre">scitex_capture.</span></span><span class="sig-name descname"><span class="pre">get_screenshots_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scitex_capture/_paths.html#get_screenshots_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_capture.get_screenshots_dir" title="Link to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">runtime/screenshots/</span></code> — single shots and monitor frames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_capture.get_gifs_dir">
+<span class="sig-prename descclassname"><span class="pre">scitex_capture.</span></span><span class="sig-name descname"><span class="pre">get_gifs_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scitex_capture/_paths.html#get_gifs_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_capture.get_gifs_dir" title="Link to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">runtime/gifs/</span></code> — assembled animated outputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>

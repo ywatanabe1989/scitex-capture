@@ -322,7 +322,9 @@
         <span class="s2">&quot;</span><span class="se">\u2705</span><span class="s2"> Monitoring started. Press Ctrl+C to stop, or run: &quot;</span>
         <span class="s2">&quot;scitex-capture stop-monitor&quot;</span>
     <span class="p">)</span>
-    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\U0001f4c1</span><span class="s2"> Saving to: ~/.scitex/capture/&quot;</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">._paths</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_screenshots_dir</span>
+
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\U0001f4c1</span><span class="s2"> Saving to: </span><span class="si">{</span><span class="n">get_screenshots_dir</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 
