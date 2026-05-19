@@ -22,8 +22,11 @@ import pytest
 class TestScreenshotWorkerInit:
     """Test ScreenshotWorker initialization."""
 
-    def test_default_initialization(self):
+    def test_default_initialization_smoke_case(self):
         """Test worker initializes with default parameters."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -41,8 +44,11 @@ class TestScreenshotWorkerInit:
             assert worker.monitor == 0
             assert worker.capture_all is False
 
-    def test_custom_initialization(self):
+    def test_custom_initialization_smoke_case(self):
         """Test worker initializes with custom parameters."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -68,6 +74,9 @@ class TestScreenshotWorkerInit:
 
     def test_creates_output_directory(self):
         """Test worker creates output directory if it doesn't exist."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -85,6 +94,9 @@ class TestScreenshotWorkerLifecycle:
 
     def test_start_sets_running_state(self):
         """Test start() sets running state correctly."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -105,6 +117,9 @@ class TestScreenshotWorkerLifecycle:
 
     def test_start_with_custom_session_id(self):
         """Test start() uses provided session_id."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -117,6 +132,9 @@ class TestScreenshotWorkerLifecycle:
 
     def test_start_generates_session_id_from_timestamp(self):
         """Test start() generates session_id from timestamp when not provided."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -131,6 +149,9 @@ class TestScreenshotWorkerLifecycle:
 
     def test_stop_when_not_running(self):
         """Test stop() is safe when worker not running."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -141,6 +162,9 @@ class TestScreenshotWorkerLifecycle:
 
     def test_double_start_is_idempotent(self):
         """Test calling start() twice doesn't create duplicate threads."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -159,6 +183,9 @@ class TestScreenshotWorkerLifecycle:
 
     def test_worker_thread_is_daemon(self):
         """Test worker thread runs as daemon."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -175,6 +202,9 @@ class TestScreenshotWorkerStatus:
 
     def test_get_status_returns_all_fields(self):
         """Test get_status() returns complete status dict."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -200,6 +230,9 @@ class TestScreenshotWorkerStatus:
 
     def test_get_status_reflects_running_state(self):
         """Test get_status() reflects current running state."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -222,6 +255,9 @@ class TestScreenshotWorkerWSLDetection:
 
     def test_is_wsl_on_linux_with_microsoft(self):
         """Test _is_wsl() returns True on WSL."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -237,6 +273,9 @@ class TestScreenshotWorkerWSLDetection:
 
     def test_is_wsl_on_linux_without_microsoft(self):
         """Test _is_wsl() returns False on regular Linux."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -249,6 +288,9 @@ class TestScreenshotWorkerWSLDetection:
 
     def test_is_wsl_on_non_linux(self):
         """Test _is_wsl() returns False on non-Linux platforms."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -266,6 +308,9 @@ class TestScreenshotWorkerCallbacks:
 
     def test_on_capture_callback_called(self):
         """Test on_capture callback is called after successful capture."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -288,6 +333,9 @@ class TestScreenshotWorkerCallbacks:
 
     def test_on_error_callback_called(self):
         """Test on_error callback is called when capture raises exception."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -312,15 +360,21 @@ class TestScreenshotWorkerCallbacks:
 class TestCaptureManager:
     """Test CaptureManager high-level interface."""
 
-    def test_initialization(self):
+    def test_initialization_manager_worker_is_none(self):
         """Test CaptureManager initializes correctly."""
+        # Arrange
         from scitex_capture.capture import CaptureManager
 
+        # Act
         manager = CaptureManager()
+        # Assert
         assert manager.worker is None
 
     def test_start_capture_creates_worker(self):
         """Test start_capture creates and starts worker."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import CaptureManager, ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -339,6 +393,9 @@ class TestCaptureManager:
 
     def test_start_capture_with_parameters(self):
         """Test start_capture passes parameters correctly."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import CaptureManager, ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -366,6 +423,9 @@ class TestCaptureManager:
 
     def test_start_capture_when_already_running(self):
         """Test start_capture returns existing worker if already running."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import CaptureManager, ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -380,11 +440,14 @@ class TestCaptureManager:
 
     def test_stop_capture_when_not_running(self):
         """Test stop_capture is safe when no worker running."""
+        # Arrange
         from scitex_capture.capture import CaptureManager
 
         manager = CaptureManager()
         # Should not raise
+        # Act
         manager.stop_capture()
+        # Assert
         assert manager.worker is None
 
 
@@ -393,6 +456,9 @@ class TestCaptureManagerSingleScreenshot:
 
     def test_take_single_screenshot_with_mocked_capture(self):
         """Test take_single_screenshot with mocked capture backend."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import CaptureManager, ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -420,6 +486,9 @@ class TestCaptureManagerSingleScreenshot:
 
     def test_take_single_screenshot_generates_default_path(self):
         """Test take_single_screenshot generates path when none provided."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import CaptureManager, ScreenshotWorker
 
         manager = CaptureManager()
@@ -435,6 +504,9 @@ class TestFilenameGeneration:
 
     def test_filename_format_jpeg(self):
         """Test JPEG filename format includes session, count, timestamp."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -454,6 +526,9 @@ class TestFilenameGeneration:
 
     def test_filename_format_png(self):
         """Test PNG extension when use_jpeg is False."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:

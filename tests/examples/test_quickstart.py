@@ -7,10 +7,13 @@ from pathlib import Path
 EXAMPLE = Path(__file__).resolve().parents[2] / "examples" / "quickstart.py"
 
 
-def test_quickstart_compiles():
+def test_quickstart_compiles_example_is_file():
+    # Arrange
+    # Act
+    # Assert
     assert EXAMPLE.is_file(), f"missing example: {EXAMPLE}"
     py_compile.compile(str(EXAMPLE), doraise=True)
 
 
 if __name__ == "__main__":
-    test_quickstart_compiles()
+    test_quickstart_compiles_example_is_file()
