@@ -17,30 +17,124 @@ import pytest
 class TestSessionInit:
     """Test Session class initialization."""
 
-    def test_default_initialization(self):
-        """Test Session initializes with default parameters."""
+    def test_default_initialization_sess_output_dir_equals_scitex_capture(self):
+        # Arrange
+        # Arrange
         from scitex_capture.session import Session
-
+        # Act
         sess = Session()
-
+        # Act
+        # Assert
+        # Assert
         assert sess.output_dir == "~/.scitex/capture/"
+
+    def test_default_initialization_sess_interval_equals_n_1_0(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        # Act
+        sess = Session()
+        # Act
+        # Assert
+        # Assert
         assert sess.interval == 1.0
+
+    def test_default_initialization_sess_jpeg_is_true(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        # Act
+        sess = Session()
+        # Act
+        # Assert
+        # Assert
         assert sess.jpeg is True
+
+    def test_default_initialization_sess_quality_equals_n_60(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        # Act
+        sess = Session()
+        # Act
+        # Assert
+        # Assert
         assert sess.quality == 60
+
+    def test_default_initialization_sess_on_capture_is_none(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        # Act
+        sess = Session()
+        # Act
+        # Assert
+        # Assert
         assert sess.on_capture is None
+
+    def test_default_initialization_sess_on_error_is_none(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        # Act
+        sess = Session()
+        # Act
+        # Assert
+        # Assert
         assert sess.on_error is None
+
+    def test_default_initialization_sess_verbose_is_true(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        # Act
+        sess = Session()
+        # Act
+        # Assert
+        # Assert
         assert sess.verbose is True
+
+    def test_default_initialization_sess_monitor_id_equals_n_0(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        # Act
+        sess = Session()
+        # Act
+        # Assert
+        # Assert
         assert sess.monitor_id == 0
+
+    def test_default_initialization_sess_capture_all_is_false(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        # Act
+        sess = Session()
+        # Act
+        # Assert
+        # Assert
         assert sess.capture_all is False
+
+    def test_default_initialization_sess_worker_is_none(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        # Act
+        sess = Session()
+        # Act
+        # Assert
+        # Assert
         assert sess.worker is None
 
-    def test_custom_initialization(self):
-        """Test Session initializes with custom parameters."""
-        from scitex_capture.session import Session
 
+    def test_custom_initialization_sess_output_dir_equals_custom_path(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
         on_capture = lambda x: None
         on_error = lambda x: None
-
+        # Act
         sess = Session(
             output_dir="/custom/path",
             interval=2.5,
@@ -52,16 +146,195 @@ class TestSessionInit:
             monitor_id=1,
             capture_all=True,
         )
-
+        # Act
+        # Assert
+        # Assert
         assert sess.output_dir == "/custom/path"
+
+    def test_custom_initialization_sess_interval_equals_n_2_5(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        on_capture = lambda x: None
+        on_error = lambda x: None
+        # Act
+        sess = Session(
+            output_dir="/custom/path",
+            interval=2.5,
+            jpeg=False,
+            quality=90,
+            on_capture=on_capture,
+            on_error=on_error,
+            verbose=False,
+            monitor_id=1,
+            capture_all=True,
+        )
+        # Act
+        # Assert
+        # Assert
         assert sess.interval == 2.5
+
+    def test_custom_initialization_sess_jpeg_is_false(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        on_capture = lambda x: None
+        on_error = lambda x: None
+        # Act
+        sess = Session(
+            output_dir="/custom/path",
+            interval=2.5,
+            jpeg=False,
+            quality=90,
+            on_capture=on_capture,
+            on_error=on_error,
+            verbose=False,
+            monitor_id=1,
+            capture_all=True,
+        )
+        # Act
+        # Assert
+        # Assert
         assert sess.jpeg is False
+
+    def test_custom_initialization_sess_quality_equals_n_90(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        on_capture = lambda x: None
+        on_error = lambda x: None
+        # Act
+        sess = Session(
+            output_dir="/custom/path",
+            interval=2.5,
+            jpeg=False,
+            quality=90,
+            on_capture=on_capture,
+            on_error=on_error,
+            verbose=False,
+            monitor_id=1,
+            capture_all=True,
+        )
+        # Act
+        # Assert
+        # Assert
         assert sess.quality == 90
+
+    def test_custom_initialization_sess_on_capture_is_on_capture(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        on_capture = lambda x: None
+        on_error = lambda x: None
+        # Act
+        sess = Session(
+            output_dir="/custom/path",
+            interval=2.5,
+            jpeg=False,
+            quality=90,
+            on_capture=on_capture,
+            on_error=on_error,
+            verbose=False,
+            monitor_id=1,
+            capture_all=True,
+        )
+        # Act
+        # Assert
+        # Assert
         assert sess.on_capture is on_capture
+
+    def test_custom_initialization_sess_on_error_is_on_error(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        on_capture = lambda x: None
+        on_error = lambda x: None
+        # Act
+        sess = Session(
+            output_dir="/custom/path",
+            interval=2.5,
+            jpeg=False,
+            quality=90,
+            on_capture=on_capture,
+            on_error=on_error,
+            verbose=False,
+            monitor_id=1,
+            capture_all=True,
+        )
+        # Act
+        # Assert
+        # Assert
         assert sess.on_error is on_error
+
+    def test_custom_initialization_sess_verbose_is_false(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        on_capture = lambda x: None
+        on_error = lambda x: None
+        # Act
+        sess = Session(
+            output_dir="/custom/path",
+            interval=2.5,
+            jpeg=False,
+            quality=90,
+            on_capture=on_capture,
+            on_error=on_error,
+            verbose=False,
+            monitor_id=1,
+            capture_all=True,
+        )
+        # Act
+        # Assert
+        # Assert
         assert sess.verbose is False
+
+    def test_custom_initialization_sess_monitor_id_equals_n_1(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        on_capture = lambda x: None
+        on_error = lambda x: None
+        # Act
+        sess = Session(
+            output_dir="/custom/path",
+            interval=2.5,
+            jpeg=False,
+            quality=90,
+            on_capture=on_capture,
+            on_error=on_error,
+            verbose=False,
+            monitor_id=1,
+            capture_all=True,
+        )
+        # Act
+        # Assert
+        # Assert
         assert sess.monitor_id == 1
+
+    def test_custom_initialization_sess_capture_all_is_true(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.session import Session
+        on_capture = lambda x: None
+        on_error = lambda x: None
+        # Act
+        sess = Session(
+            output_dir="/custom/path",
+            interval=2.5,
+            jpeg=False,
+            quality=90,
+            on_capture=on_capture,
+            on_error=on_error,
+            verbose=False,
+            monitor_id=1,
+            capture_all=True,
+        )
+        # Act
+        # Assert
+        # Assert
         assert sess.capture_all is True
+
 
 
 class TestSessionContextManager:
@@ -69,6 +342,9 @@ class TestSessionContextManager:
 
     def test_enter_starts_monitoring(self):
         """Test __enter__ starts capture monitoring."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.session import Session
 
@@ -87,6 +363,9 @@ class TestSessionContextManager:
 
     def test_exit_stops_monitoring(self):
         """Test __exit__ stops capture monitoring."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.session import Session
 
@@ -105,6 +384,9 @@ class TestSessionContextManager:
 
     def test_exit_returns_false(self):
         """Test __exit__ returns False (doesn't suppress exceptions)."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.session import Session
 
@@ -119,6 +401,9 @@ class TestSessionContextManager:
 
     def test_context_manager_with_statement(self):
         """Test Session works with 'with' statement."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.session import Session
 
@@ -135,6 +420,9 @@ class TestSessionContextManager:
 
     def test_context_manager_passes_parameters(self):
         """Test Session passes parameters to start_monitor."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.session import Session
 
@@ -164,6 +452,9 @@ class TestSessionCallbacks:
 
     def test_on_capture_callback_passed(self):
         """Test on_capture callback is passed to worker."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.session import Session
 
@@ -179,6 +470,9 @@ class TestSessionCallbacks:
 
     def test_on_error_callback_passed(self):
         """Test on_error callback is passed to worker."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.session import Session
 
@@ -198,6 +492,9 @@ class TestSessionExceptionHandling:
 
     def test_exception_in_context_still_stops_worker(self):
         """Test worker stops even when exception occurs in context."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.session import Session
 
@@ -222,13 +519,19 @@ class TestSessionFactoryFunction:
 
     def test_session_returns_session_instance(self):
         """Test session() returns a Session instance."""
+        # Arrange
         from scitex_capture.session import Session, session
 
+        # Act
         result = session()
+        # Assert
         assert isinstance(result, Session)
 
     def test_session_passes_kwargs(self):
         """Test session() passes kwargs to Session.__init__."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.session import session
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -252,6 +555,9 @@ class TestSessionFactoryFunction:
 
     def test_session_factory_works_as_context_manager(self):
         """Test session() result works as context manager."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.session import session
 
@@ -269,20 +575,29 @@ class TestModuleExports:
 
     def test_session_class_importable(self):
         """Test Session class can be imported."""
+        # Arrange
+        # Act
         from scitex_capture.session import Session
 
+        # Assert
         assert Session is not None
 
     def test_session_function_importable(self):
         """Test session function can be imported."""
+        # Arrange
+        # Act
         from scitex_capture.session import session
 
+        # Assert
         assert callable(session)
 
     def test_session_from_package_init(self):
         """Test session is accessible from package init."""
+        # Arrange
+        # Act
         from scitex_capture import session
 
+        # Assert
         assert callable(session)
 
 

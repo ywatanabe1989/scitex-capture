@@ -24,6 +24,9 @@ class TestCaptureFunction:
 
     def test_capture_returns_none_on_failure(self):
         """Test capture returns None when capture fails."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -40,6 +43,9 @@ class TestCaptureFunction:
 
     def test_capture_with_message(self):
         """Test capture with message parameter."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.utils import capture
 
@@ -59,6 +65,9 @@ class TestCaptureMonitorSettings:
 
     def test_capture_with_monitor_id(self):
         """Test capture with specific monitor_id."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.utils import capture
 
@@ -74,6 +83,9 @@ class TestCaptureMonitorSettings:
 
     def test_capture_all_monitors(self):
         """Test capture with capture_all=True."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.utils import capture
 
@@ -89,6 +101,9 @@ class TestCaptureMonitorSettings:
 
     def test_capture_all_shorthand(self):
         """Test capture with all=True shorthand."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.utils import capture
 
@@ -108,6 +123,9 @@ class TestCaptureURLCapture:
 
     def test_capture_url_returns_none_on_failure(self):
         """Test URL capture returns None when all methods fail."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.utils import capture
 
         # Mock playwright import to fail
@@ -127,6 +145,9 @@ class TestCaptureAppCapture:
 
     def test_capture_app_not_found(self):
         """Test capture when specified app is not found."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.utils import _manager, capture
 
         with patch.object(
@@ -140,6 +161,9 @@ class TestCaptureAppCapture:
 
     def test_capture_app_found_but_capture_fails(self):
         """Test capture when app is found but capture fails."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.utils import _manager, capture
 
         mock_windows = {
@@ -168,6 +192,9 @@ class TestTakeScreenshot:
 
     def test_take_screenshot_returns_none_on_failure(self):
         """Test take_screenshot returns None when capture fails."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.utils import take_screenshot
 
@@ -177,6 +204,9 @@ class TestTakeScreenshot:
 
     def test_take_screenshot_with_custom_path(self):
         """Test take_screenshot with custom output path."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.utils import take_screenshot
 
@@ -189,6 +219,9 @@ class TestTakeScreenshot:
 
     def test_take_screenshot_with_quality(self):
         """Test take_screenshot with quality parameter."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.utils import take_screenshot
 
@@ -202,6 +235,9 @@ class TestStartStopMonitor:
 
     def test_start_monitor_returns_worker(self):
         """Test start_monitor returns a ScreenshotWorker."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.utils import start_monitor, stop_monitor
 
@@ -221,6 +257,9 @@ class TestStartStopMonitor:
 
     def test_start_monitor_with_callbacks(self):
         """Test start_monitor with on_capture and on_error callbacks."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.utils import start_monitor, stop_monitor
 
@@ -243,6 +282,9 @@ class TestStartStopMonitor:
 
     def test_start_monitor_with_monitor_settings(self):
         """Test start_monitor with monitor_id and capture_all."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.utils import start_monitor, stop_monitor
 
@@ -262,6 +304,9 @@ class TestStartStopMonitor:
 
     def test_stop_monitor_when_not_started(self):
         """Test stop_monitor is safe when not started."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.utils import stop_monitor
 
         # Should not raise
@@ -273,6 +318,9 @@ class TestCacheSizeManagement:
 
     def test_manage_cache_size_does_nothing_under_limit(self):
         """Test cache management doesn't delete files under limit."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.utils import _manage_cache_size
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -289,6 +337,9 @@ class TestCacheSizeManagement:
 
     def test_manage_cache_size_deletes_old_files(self):
         """Test cache management deletes oldest files when over limit."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.utils import _manage_cache_size
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -309,6 +360,9 @@ class TestCacheSizeManagement:
 
     def test_manage_cache_size_nonexistent_dir(self):
         """Test cache management handles nonexistent directory."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.utils import _manage_cache_size
 
         # Should not raise
@@ -316,6 +370,9 @@ class TestCacheSizeManagement:
 
     def test_manage_cache_size_handles_png_files(self):
         """Test cache management also handles PNG files."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.utils import _manage_cache_size
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -336,6 +393,9 @@ class TestCategoryDetection:
 
     def test_detect_category_returns_stdout_by_default(self):
         """Test _detect_category returns 'stdout' by default."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.utils import _detect_category
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -354,6 +414,9 @@ class TestCategoryDetection:
 
     def test_detect_category_detects_red_as_error(self):
         """Test _detect_category detects red-dominant images as error."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.utils import _detect_category
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -371,30 +434,52 @@ class TestCategoryDetection:
             except ImportError:
                 pytest.skip("PIL not available")
 
-    def test_detect_category_detects_error_from_filename(self):
-        """Test _detect_category detects error keywords in filename."""
+    def test_detect_category_detects_error_from_filename_result_equals_stderr(self):
+        # Arrange
+        # Arrange
         from scitex_capture.utils import _detect_category
-
         # Without a valid image, it falls back to filename-based detection
+        # Act
         result = _detect_category("/path/to/error_screenshot.jpg")
+        # Act
+        # Assert
+        # Assert
         assert result == "stderr"
 
-        result = _detect_category("/path/to/fail_test.jpg")
+    def test_detect_category_detects_error_from_filename_result_equals_stderr(self):
+        # Arrange
+        # Arrange
+        from scitex_capture.utils import _detect_category
+        # Without a valid image, it falls back to filename-based detection
+        # Act
+        result = _detect_category("/path/to/error_screenshot.jpg")
+        # Assert
         assert result == "stderr"
+        result = _detect_category("/path/to/fail_test.jpg")
+        # Act
+        # Assert
+        assert result == "stderr"
+
 
     def test_detect_category_detects_warning_from_filename(self):
         """Test _detect_category detects warning keywords in filename."""
+        # Arrange
         from scitex_capture.utils import _detect_category
 
+        # Act
         result = _detect_category("/path/to/warning_dialog.jpg")
+        # Assert
         assert result == "stderr"
 
     def test_detect_category_handles_missing_file(self):
         """Test _detect_category handles missing file gracefully."""
+        # Arrange
         from scitex_capture.utils import _detect_category
 
         # Nonexistent file should return stdout (default)
+        # Act
         result = _detect_category("/nonexistent/file.jpg")
+        # Assert
         assert result == "stdout"
 
 
@@ -403,12 +488,18 @@ class TestExceptionContextDetection:
 
     def test_is_in_exception_context_false_normally(self):
         """Test _is_in_exception_context returns False normally."""
+        # Arrange
+        # Act
         from scitex_capture.utils import _is_in_exception_context
 
+        # Assert
         assert _is_in_exception_context() is False
 
     def test_is_in_exception_context_true_in_except(self):
         """Test _is_in_exception_context returns True in except block."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.utils import _is_in_exception_context
 
         try:
@@ -422,6 +513,9 @@ class TestMessageMetadata:
 
     def test_add_message_metadata_with_pil(self):
         """Test _add_message_metadata adds EXIF metadata with PIL."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.utils import _add_message_metadata
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -442,6 +536,9 @@ class TestMessageMetadata:
 
     def test_add_message_metadata_creates_text_file_fallback(self):
         """Test _add_message_metadata creates text file when PIL fails."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.utils import _add_message_metadata
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -464,6 +561,9 @@ class TestModuleExports:
 
     def test_all_exports_accessible(self):
         """Test all __all__ exports are accessible."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture import utils
 
         for name in utils.__all__:
@@ -471,22 +571,42 @@ class TestModuleExports:
 
     def test_capture_is_exported(self):
         """Test capture function is exported."""
+        # Arrange
+        # Act
         from scitex_capture.utils import capture
 
+        # Assert
         assert callable(capture)
 
     def test_take_screenshot_is_exported(self):
         """Test take_screenshot function is exported."""
+        # Arrange
+        # Act
         from scitex_capture.utils import take_screenshot
 
+        # Assert
         assert callable(take_screenshot)
 
-    def test_start_stop_monitor_exported(self):
-        """Test start_monitor and stop_monitor are exported."""
+    def test_start_stop_monitor_exported_callable_start_monitor(self):
+        # Arrange
+        # Arrange
+        # Act
         from scitex_capture.utils import start_monitor, stop_monitor
-
+        # Act
+        # Assert
+        # Assert
         assert callable(start_monitor)
+
+    def test_start_stop_monitor_exported_callable_stop_monitor(self):
+        # Arrange
+        # Arrange
+        # Act
+        from scitex_capture.utils import start_monitor, stop_monitor
+        # Act
+        # Assert
+        # Assert
         assert callable(stop_monitor)
+
 
 
 if __name__ == "__main__":

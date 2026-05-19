@@ -21,11 +21,14 @@ import pytest
 class TestGifCreatorInit:
     """Test GifCreator initialization."""
 
-    def test_initialization(self):
+    def test_initialization_creator_is_not_none(self):
         """Test GifCreator initializes correctly."""
+        # Arrange
         from scitex_capture.gif import GifCreator
 
+        # Act
         creator = GifCreator()
+        # Assert
         assert creator is not None
 
 
@@ -34,6 +37,9 @@ class TestCreateGifFromFiles:
 
     def test_create_gif_with_valid_images(self):
         """Test GIF creation with valid image files."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         try:
@@ -62,6 +68,9 @@ class TestCreateGifFromFiles:
 
     def test_create_gif_empty_paths(self):
         """Test GIF creation with empty paths list."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -75,6 +84,9 @@ class TestCreateGifFromFiles:
 
     def test_create_gif_nonexistent_paths(self):
         """Test GIF creation with nonexistent image paths."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -89,6 +101,9 @@ class TestCreateGifFromFiles:
 
     def test_create_gif_with_duration(self):
         """Test GIF creation with custom duration."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         try:
@@ -115,6 +130,9 @@ class TestCreateGifFromFiles:
 
     def test_create_gif_with_different_sizes(self):
         """Test GIF creation with images of different sizes."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         try:
@@ -140,6 +158,9 @@ class TestCreateGifFromFiles:
 
     def test_create_gif_creates_output_directory(self):
         """Test GIF creation creates parent directory."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         try:
@@ -167,6 +188,9 @@ class TestCreateGifFromSession:
 
     def test_create_gif_from_session_no_files(self):
         """Test GIF creation from session with no matching files."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -179,6 +203,9 @@ class TestCreateGifFromSession:
 
     def test_create_gif_from_session_with_files(self):
         """Test GIF creation from session with matching files."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         try:
@@ -204,6 +231,9 @@ class TestCreateGifFromSession:
 
     def test_create_gif_from_session_png_fallback(self):
         """Test GIF creation falls back to PNG files."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         try:
@@ -228,6 +258,9 @@ class TestCreateGifFromSession:
 
     def test_create_gif_from_session_max_frames(self):
         """Test GIF creation with max_frames limit."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         try:
@@ -256,6 +289,9 @@ class TestCreateGifFromPattern:
 
     def test_create_gif_from_pattern_no_matches(self):
         """Test GIF creation with no matching files."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -267,6 +303,9 @@ class TestCreateGifFromPattern:
 
     def test_create_gif_from_pattern_with_matches(self):
         """Test GIF creation with matching files."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         try:
@@ -292,6 +331,9 @@ class TestCreateGifFromPattern:
 
     def test_create_gif_from_pattern_auto_output_path(self):
         """Test GIF creation generates output path automatically."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         try:
@@ -313,6 +355,9 @@ class TestCreateGifFromPattern:
 
     def test_create_gif_from_pattern_max_frames(self):
         """Test GIF creation from pattern with max_frames."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         try:
@@ -341,6 +386,9 @@ class TestGetRecentSessions:
 
     def test_get_recent_sessions_empty_dir(self):
         """Test getting sessions from empty directory."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -351,15 +399,21 @@ class TestGetRecentSessions:
 
     def test_get_recent_sessions_nonexistent_dir(self):
         """Test getting sessions from nonexistent directory."""
+        # Arrange
         from scitex_capture.gif import GifCreator
 
         creator = GifCreator()
+        # Act
         result = creator.get_recent_sessions(screenshot_dir="/nonexistent/path")
 
+        # Assert
         assert result == []
 
     def test_get_recent_sessions_with_files(self):
         """Test getting sessions with session files present."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -380,6 +434,9 @@ class TestGetRecentSessions:
 
     def test_get_recent_sessions_sorted_newest_first(self):
         """Test sessions are sorted newest first."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -400,6 +457,9 @@ class TestCreateGifFromRecentSession:
 
     def test_create_gif_from_recent_session_no_sessions(self):
         """Test GIF creation when no sessions exist."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -410,6 +470,9 @@ class TestCreateGifFromRecentSession:
 
     def test_create_gif_from_recent_session_with_session(self):
         """Test GIF creation from most recent session."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         try:
@@ -436,6 +499,9 @@ class TestConvenienceFunctions:
 
     def test_create_gif_from_session_function(self):
         """Test create_gif_from_session convenience function."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import create_gif_from_session
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -446,6 +512,9 @@ class TestConvenienceFunctions:
 
     def test_create_gif_from_files_function(self):
         """Test create_gif_from_files convenience function."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import create_gif_from_files
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -455,6 +524,9 @@ class TestConvenienceFunctions:
 
     def test_create_gif_from_pattern_function(self):
         """Test create_gif_from_pattern convenience function."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import create_gif_from_pattern
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -464,6 +536,9 @@ class TestConvenienceFunctions:
 
     def test_create_gif_from_latest_session_function(self):
         """Test create_gif_from_latest_session convenience function."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import create_gif_from_latest_session
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -474,28 +549,80 @@ class TestConvenienceFunctions:
 class TestModuleExports:
     """Test module exports."""
 
-    def test_gifcreator_importable(self):
+    def test_gifcreator_importable_gifcreator_is_not_none(self):
         """Test GifCreator class can be imported."""
+        # Arrange
+        # Act
         from scitex_capture.gif import GifCreator
 
+        # Assert
         assert GifCreator is not None
 
-    def test_all_functions_importable(self):
-        """Test all convenience functions can be imported."""
+    def test_all_functions_importable_callable_create_gif_from_session(self):
+        # Arrange
+        # Arrange
+        # Act
         from scitex_capture.gif import (
             create_gif_from_files,
             create_gif_from_latest_session,
             create_gif_from_pattern,
             create_gif_from_session,
         )
-
+        # Act
+        # Assert
+        # Assert
         assert callable(create_gif_from_session)
+
+    def test_all_functions_importable_callable_create_gif_from_files(self):
+        # Arrange
+        # Arrange
+        # Act
+        from scitex_capture.gif import (
+            create_gif_from_files,
+            create_gif_from_latest_session,
+            create_gif_from_pattern,
+            create_gif_from_session,
+        )
+        # Act
+        # Assert
+        # Assert
         assert callable(create_gif_from_files)
+
+    def test_all_functions_importable_callable_create_gif_from_pattern(self):
+        # Arrange
+        # Arrange
+        # Act
+        from scitex_capture.gif import (
+            create_gif_from_files,
+            create_gif_from_latest_session,
+            create_gif_from_pattern,
+            create_gif_from_session,
+        )
+        # Act
+        # Assert
+        # Assert
         assert callable(create_gif_from_pattern)
+
+    def test_all_functions_importable_callable_create_gif_from_latest_session(self):
+        # Arrange
+        # Arrange
+        # Act
+        from scitex_capture.gif import (
+            create_gif_from_files,
+            create_gif_from_latest_session,
+            create_gif_from_pattern,
+            create_gif_from_session,
+        )
+        # Act
+        # Assert
+        # Assert
         assert callable(create_gif_from_latest_session)
+
 
     def test_functions_from_package_init(self):
         """Test GIF functions accessible from package init."""
+        # Arrange
+        # Act
         from scitex_capture import (
             create_gif_from_files,
             create_gif_from_latest_session,
@@ -503,6 +630,7 @@ class TestModuleExports:
             create_gif_from_session,
         )
 
+        # Assert
         assert callable(create_gif_from_session)
 
 
@@ -511,6 +639,9 @@ class TestPILNotAvailable:
 
     def test_create_gif_without_pil(self):
         """Test GIF creation handles missing PIL gracefully."""
+        # Arrange
+        # Act
+        # Assert
         from scitex_capture.gif import GifCreator
 
         with tempfile.TemporaryDirectory() as tmpdir:
