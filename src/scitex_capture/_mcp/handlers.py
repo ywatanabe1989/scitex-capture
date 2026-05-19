@@ -29,13 +29,15 @@ __all__ = [
 
 
 def _get_capture_dir() -> Path:
-    """Get the capture output directory."""
-    import os
+    """Get the capture output directory (screenshots category).
 
-    base_dir = Path(os.getenv("SCITEX_DIR", Path.home() / ".scitex"))
-    capture_dir = base_dir / "capture"
-    capture_dir.mkdir(parents=True, exist_ok=True)
-    return capture_dir
+    Returns ``$SCITEX_DIR/capture/runtime/screenshots/`` — the same
+    logical directory that screenshots have always landed in, just
+    relocated under the canonical ``runtime/`` subtree.
+    """
+    from .._paths import get_screenshots_dir
+
+    return get_screenshots_dir()
 
 
 # Monitoring state (module-level singleton)

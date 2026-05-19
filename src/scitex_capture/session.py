@@ -17,7 +17,7 @@ class Session:
 
     def __init__(
         self,
-        output_dir: str = "~/.scitex/capture/",
+        output_dir: str | None = None,
         interval: float = 1.0,
         jpeg: bool = True,
         quality: int = 60,
@@ -27,7 +27,13 @@ class Session:
         monitor_id: int = 0,
         capture_all: bool = False,
     ):
-        """Initialize session parameters."""
+        """Initialize session parameters.
+
+        ``output_dir`` defaults to ``None``, meaning ``start_monitor``
+        will route screenshots through the package's canonical
+        runtime layout (``$SCITEX_DIR/capture/runtime/screenshots/``).
+        Pass an explicit path to override.
+        """
         self.output_dir = output_dir
         self.interval = interval
         self.jpeg = jpeg

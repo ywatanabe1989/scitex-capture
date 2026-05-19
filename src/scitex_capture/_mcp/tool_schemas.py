@@ -86,7 +86,7 @@ def get_tool_schemas() -> list[types.Tool]:
                     },
                     "output_dir": {
                         "type": "string",
-                        "description": "Directory for screenshots (default: ~/.scitex/capture)",
+                        "description": "Directory for screenshots (default: $SCITEX_DIR/capture/runtime/screenshots/)",
                     },
                     "quality": {
                         "type": "integer",

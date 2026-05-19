@@ -186,7 +186,12 @@ gif_path = create_gif_from_pattern(
 
 ## Configuration
 
-Default cache location: `~/.cache/scitex_capture`
+Default cache location: `$SCITEX_DIR/capture/runtime/screenshots/`
+(falls back to `~/.scitex/capture/runtime/screenshots/`). Assembled
+GIFs land alongside in `runtime/gifs/`. The package root
+`$SCITEX_DIR/capture/` itself is reserved for tracked declarative
+inputs (e.g. `config.yaml`); never write outside `runtime/<category>/`.
+See `scitex-dev` skill `general/01_ecosystem_06_local-state-directories.md`.
 
 Quality settings:
 - Monitoring: 60 (balance of quality and size)

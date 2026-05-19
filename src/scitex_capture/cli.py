@@ -244,7 +244,9 @@ def start_monitor(interval, monitor, all_monitors, quiet, yes, dry_run):
         "\u2705 Monitoring started. Press Ctrl+C to stop, or run: "
         "scitex-capture stop-monitor"
     )
-    click.echo("\U0001f4c1 Saving to: ~/.scitex/capture/")
+    from ._paths import get_screenshots_dir
+
+    click.echo(f"\U0001f4c1 Saving to: {get_screenshots_dir()}")
     try:
         import time
 

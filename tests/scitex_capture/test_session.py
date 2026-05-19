@@ -17,7 +17,7 @@ import pytest
 class TestSessionInit:
     """Test Session class initialization."""
 
-    def test_default_initialization_sess_output_dir_equals_scitex_capture(self):
+    def test_default_initialization_sess_output_dir_is_none(self):
         # Arrange
         # Arrange
         from scitex_capture.session import Session
@@ -26,7 +26,10 @@ class TestSessionInit:
         # Act
         # Assert
         # Assert
-        assert sess.output_dir == "~/.scitex/capture/"
+        # Default output_dir is None so start_monitor lazily resolves
+        # the canonical $SCITEX_DIR/capture/runtime/screenshots/ path
+        # at use time (honours $SCITEX_DIR relocation).
+        assert sess.output_dir is None
 
     def test_default_initialization_sess_interval_equals_n_1_0(self):
         # Arrange

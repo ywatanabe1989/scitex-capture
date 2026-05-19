@@ -21,6 +21,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from ._paths import get_screenshots_dir, get_tmp_dir
 from .capture import CaptureManager, ScreenshotWorker
 
 # Global manager instance
@@ -104,7 +105,9 @@ def capture(
     message : str, optional
         Message to include in filename
     path : str, optional
-        Output path (default: ~/.scitex/capture/)
+        Output path. Defaults to the canonical
+        ``$SCITEX_DIR/capture/runtime/screenshots/`` directory when
+        unset.
     quality : int
         JPEG quality (1-100)
     all : bool
@@ -151,7 +154,9 @@ def capture(
                 url_slug = (
                     url.replace("://", "_").replace("/", "_").replace(":", "_")[:30]
                 )
-                path = f"~/.scitex/capture/{timestamp_str}-url-{url_slug}.jpg"
+                path = str(
+                    get_screenshots_dir() / f"{timestamp_str}-url-{url_slug}.jpg"
+                )
 
             path = os.path.expanduser(path)
 
@@ -226,7 +231,10 @@ def capture(
                     url_slug = (
                         url.replace("://", "_").replace("/", "_").replace(":", "_")[:30]
                     )
-                    path = f"~/.scitex/capture/{timestamp_str}-url-{url_slug}.jpg"
+                    path = str(
+                        get_screenshots_dir()
+                        / f"{timestamp_str}-url-{url_slug}.jpg"
+                    )
 
                 path = os.path.expanduser(path)
 
@@ -372,8 +380,7 @@ def capture(
 
     # Take screenshot first to analyze it
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
-    temp_dir = "/tmp/scitex_capture_temp"
-    Path(temp_dir).mkdir(exist_ok=True)
+    temp_dir = str(get_tmp_dir())
 
     # Take screenshot to temp location
     use_jpeg = (
@@ -437,7 +444,10 @@ def capture(
     # Handle path with category and message
     if path is None:
         # Include monitor/scope info in filename
-        path = f"~/.scitex/capture/<timestamp><scope><message><category_suffix>.jpg"
+        path = str(
+            get_screenshots_dir()
+            / "<timestamp><scope><message><category_suffix>.jpg"
+        )
 
     # Expand user home
     path = os.path.expanduser(path)
@@ -468,7 +478,7 @@ def capture(
         _add_message_metadata(str(final_path), metadata)
 
     # Manage cache size (remove old files if needed)
-    cache_dir = Path(os.path.expanduser("~/.scitex/capture"))
+    cache_dir = get_screenshots_dir()
     if cache_dir.exists():
         _manage_cache_size(cache_dir, max_cache_gb)
 
@@ -511,7 +521,7 @@ def take_screenshot(
 
 
 def start_monitor(
-    output_dir: str = "~/.scitex/capture/",
+    output_dir: Optional[str] = None,
     interval: float = 1.0,
     jpeg: bool = True,
     quality: int = 60,
@@ -526,8 +536,10 @@ def start_monitor(
 
     Parameters
     ----------
-    output_dir : str
-        Directory for screenshots (default: ~/.scitex/capture/)
+    output_dir : str, optional
+        Directory for screenshots. Defaults to the canonical
+        ``$SCITEX_DIR/capture/runtime/screenshots/`` location when
+        unset.
     interval : float
         Seconds between captures
     jpeg : bool
@@ -567,8 +579,11 @@ def start_monitor(
     ...         send_alert(f"Error detected: {path}")
     >>> capture.start(on_capture=check_error_dialog)
     """
-    # Expand user home directory
-    output_dir = os.path.expanduser(output_dir)
+    # Resolve default output directory lazily to honour $SCITEX_DIR.
+    if output_dir is None:
+        output_dir = str(get_screenshots_dir())
+    else:
+        output_dir = os.path.expanduser(output_dir)
 
     return _manager.start_capture(
         output_dir=output_dir,

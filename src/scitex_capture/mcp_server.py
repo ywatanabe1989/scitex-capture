@@ -70,26 +70,26 @@ import shutil
 
 import scitex_capture as capture
 
-# Use SCITEX_DIR environment variable if set, otherwise default to ~/.scitex
-SCITEX_BASE_DIR = Path(os.getenv("SCITEX_DIR", Path.home() / ".scitex"))
-SCITEX_CAPTURE_DIR = SCITEX_BASE_DIR / "capture"
+from ._paths import get_capture_root, get_screenshots_dir
+
+# Legacy on-disk location, kept only so historical screenshots can be
+# migrated forward on first run.
 LEGACY_CAPTURE_DIR = Path.home() / ".cache" / "cammy"
 
 
 def get_capture_dir() -> Path:
     """
     Get the screenshot capture directory.
-    Uses $SCITEX_DIR/capture if SCITEX_DIR is set, otherwise ~/.scitex/capture.
-    Migrates from legacy location (~/.cache/cammy) if needed.
 
-    Returns:
-        Path to $SCITEX_DIR/capture or ~/.scitex/capture (migrating from ~/.cache/cammy if needed)
+    Returns the canonical
+    ``$SCITEX_DIR/capture/runtime/screenshots/`` location and migrates
+    any leftover files from the legacy ``~/.cache/cammy`` cache on
+    first call. The return value (the directory where screenshots
+    land) is the same logical thing it has always been — only the
+    on-disk layout moved beneath ``runtime/screenshots/``.
     """
-    new_dir = SCITEX_CAPTURE_DIR
+    new_dir = get_screenshots_dir()
     old_dir = LEGACY_CAPTURE_DIR
-
-    # Create new directory if it doesn't exist
-    new_dir.mkdir(parents=True, exist_ok=True)
 
     # Migrate from old location if exists and new is empty
     if old_dir.exists():
@@ -184,7 +184,7 @@ class CaptureServer:
                             },
                             "output_dir": {
                                 "type": "string",
-                                "description": "Directory for screenshots (default: ~/.scitex/capture)",
+                                "description": "Directory for screenshots (default: $SCITEX_DIR/capture/runtime/screenshots/)",
                             },
                             "quality": {
                                 "type": "integer",
@@ -523,7 +523,7 @@ class CaptureServer:
             # Use a lambda to pass the monitor parameters correctly
             def start_with_monitor():
                 return capture.start_monitor(
-                    output_dir=output_dir or "~/.scitex/capture/",
+                    output_dir=output_dir or str(get_screenshots_dir()),
                     interval=interval,
                     jpeg=True,
                     quality=quality,
@@ -543,7 +543,7 @@ class CaptureServer:
             return {
                 "success": True,
                 "message": f"Started monitoring with {interval}s interval on monitor {monitor_id}",
-                "output_dir": output_dir or "~/.scitex/capture/",
+                "output_dir": output_dir or str(get_screenshots_dir()),
                 "interval": interval,
                 "monitor_id": monitor_id,
                 "capture_all": capture_all,
@@ -745,6 +745,8 @@ class CaptureServer:
             creator = GifCreator()
             loop = asyncio.get_event_loop()
 
+            screenshots_dir = str(get_screenshots_dir())
+
             # Determine which creation method to use
             if session_id:
                 if session_id == "latest":
@@ -752,7 +754,7 @@ class CaptureServer:
                     result_path = await loop.run_in_executor(
                         None,
                         creator.create_gif_from_recent_session,
-                        "~/.scitex/capture",
+                        screenshots_dir,
                         duration,
                         optimize,
                         max_frames,
@@ -764,7 +766,7 @@ class CaptureServer:
                         creator.create_gif_from_session,
                         session_id,
                         output_path,
-                        "~/.scitex/capture",
+                        screenshots_dir,
                         duration,
                         optimize,
                         max_frames,
@@ -772,8 +774,12 @@ class CaptureServer:
             elif image_paths:
                 # Use specific image paths
                 if not output_path:
+                    from ._paths import get_gifs_dir
+
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    output_path = f"~/.scitex/capture/custom_gif_{timestamp}.gif"
+                    output_path = str(
+                        get_gifs_dir() / f"custom_gif_{timestamp}.gif"
+                    )
 
                 result_path = await loop.run_in_executor(
                     None,
@@ -836,7 +842,7 @@ class CaptureServer:
             loop = asyncio.get_event_loop()
 
             sessions = await loop.run_in_executor(
-                None, creator.get_recent_sessions, "~/.scitex/capture"
+                None, creator.get_recent_sessions, str(get_screenshots_dir())
             )
 
             # Limit results

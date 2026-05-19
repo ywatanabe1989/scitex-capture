@@ -37,7 +37,11 @@ start_monitor(interval=10, duration=300, monitor=0)
 stop_monitor()
 ```
 
-Frames are written to `$SCITEX_DIR/capture/<session_id>/frame_*.jpg`.
+Frames are written to `$SCITEX_DIR/capture/runtime/screenshots/<session_id>_*.jpg`
+(falls back to `~/.scitex/capture/runtime/screenshots/...`). The
+package root `$SCITEX_DIR/capture/` is reserved for tracked
+declarative inputs — runtime artefacts always live under
+`runtime/<category>/`.
 
 ## Sessions
 
@@ -59,5 +63,8 @@ See `gif.*` submodule for additional encoders (mp4, webp).
 
 ## Output paths
 
-All artifacts default to `$SCITEX_DIR/capture/`. Override with `output_path=`
-on individual calls or `SCITEX_DIR` at the env level.
+All artefacts default to `$SCITEX_DIR/capture/runtime/<category>/`
+(screenshots → `runtime/screenshots/`, GIFs → `runtime/gifs/`,
+scratch temp → `runtime/tmp/`). Override with `output_path=` /
+`output_dir=` on individual calls, or relocate the whole tree with
+`SCITEX_DIR` at the env level.

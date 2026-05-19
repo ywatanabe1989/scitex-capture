@@ -22,6 +22,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
+from ._paths import get_gifs_dir, get_screenshots_dir
+
 
 class GifCreator:
     """
@@ -37,7 +39,7 @@ class GifCreator:
         self,
         session_id: str,
         output_path: Optional[str] = None,
-        screenshot_dir: str = "~/.scitex/capture",
+        screenshot_dir: Optional[str] = None,
         duration: float = 0.5,
         optimize: bool = True,
         max_frames: Optional[int] = None,
@@ -57,7 +59,10 @@ class GifCreator:
             Path to created GIF file, or None if failed
         """
         try:
-            screenshot_dir = Path(screenshot_dir).expanduser()
+            if screenshot_dir is None:
+                screenshot_dir = get_screenshots_dir()
+            else:
+                screenshot_dir = Path(screenshot_dir).expanduser()
 
             # Find all screenshots for this session
             pattern = f"{session_id}_*.jpg"
@@ -82,7 +87,7 @@ class GifCreator:
                 jpg_files = jpg_files[::step][:max_frames]
 
             if output_path is None:
-                output_path = screenshot_dir / f"{session_id}_summary.gif"
+                output_path = get_gifs_dir() / f"{session_id}_summary.gif"
             else:
                 output_path = Path(output_path)
 
@@ -223,10 +228,9 @@ class GifCreator:
                 files = files[::step][:max_frames]
 
             if output_path is None:
-                # Generate output path based on pattern
-                pattern_dir = Path(pattern).parent
+                # Generate output path under the canonical gifs runtime dir
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                output_path = pattern_dir / f"gif_summary_{timestamp}.gif"
+                output_path = get_gifs_dir() / f"gif_summary_{timestamp}.gif"
 
             return self.create_gif_from_files(
                 image_paths=files,
@@ -240,19 +244,23 @@ class GifCreator:
             return None
 
     def get_recent_sessions(
-        self, screenshot_dir: str = "~/.scitex/capture"
+        self, screenshot_dir: Optional[str] = None
     ) -> List[str]:
         """
         Get list of recent monitoring session IDs.
 
         Args:
-            screenshot_dir: Directory containing screenshots
+            screenshot_dir: Directory containing screenshots. Defaults
+                to ``$SCITEX_DIR/capture/runtime/screenshots/``.
 
         Returns:
             List of session IDs sorted by recency (newest first)
         """
         try:
-            screenshot_dir = Path(screenshot_dir).expanduser()
+            if screenshot_dir is None:
+                screenshot_dir = get_screenshots_dir()
+            else:
+                screenshot_dir = Path(screenshot_dir).expanduser()
 
             if not screenshot_dir.exists():
                 return []
@@ -276,7 +284,7 @@ class GifCreator:
 
     def create_gif_from_recent_session(
         self,
-        screenshot_dir: str = "~/.scitex/capture",
+        screenshot_dir: Optional[str] = None,
         duration: float = 0.5,
         optimize: bool = True,
         max_frames: Optional[int] = None,

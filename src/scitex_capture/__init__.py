@@ -40,6 +40,13 @@ try:
 except ImportError:  # pragma: no cover — only on ancient Pythons
     __version__ = "0.0.0+local"
 
+from ._paths import (
+    get_capture_dir,
+    get_capture_root,
+    get_gifs_dir,
+    get_runtime_dir,
+    get_screenshots_dir,
+)
 from .capture import CaptureManager as _CaptureManager  # Internal class
 from .gif import (
     create_gif_from_files,
@@ -120,4 +127,11 @@ __all__ = [
     "create_gif_from_files",
     "create_gif_from_pattern",
     "create_gif_from_latest_session",
+    # Local-state-directory helpers (see _paths.py / scitex-dev
+    # general/01_ecosystem_06_local-state-directories.md).
+    "get_capture_root",
+    "get_capture_dir",
+    "get_runtime_dir",
+    "get_screenshots_dir",
+    "get_gifs_dir",
 ]

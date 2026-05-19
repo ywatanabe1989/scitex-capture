@@ -24,6 +24,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from ._paths import get_screenshots_dir
+
 
 class ScreenshotWorker:
     """
@@ -33,7 +35,7 @@ class ScreenshotWorker:
 
     def __init__(
         self,
-        output_dir: str = "/tmp/scitex_capture_screenshots",
+        output_dir: Optional[str] = None,
         interval_sec: float = 1.0,
         verbose: bool = False,
         use_jpeg: bool = True,
@@ -46,8 +48,10 @@ class ScreenshotWorker:
 
         Parameters
         ----------
-        output_dir : str
-            Directory for saving screenshots
+        output_dir : str, optional
+            Directory for saving screenshots. Defaults to the canonical
+            ``$SCITEX_DIR/capture/runtime/screenshots/`` location when
+            unset.
         interval_sec : float
             Seconds between screenshots (default: 1.0)
         verbose : bool
@@ -61,6 +65,8 @@ class ScreenshotWorker:
         on_error : callable, optional
             Callback function called with exception on errors
         """
+        if output_dir is None:
+            output_dir = str(get_screenshots_dir())
         self.output_dir = Path(output_dir)
         self.interval_sec = interval_sec
         self.verbose = verbose
@@ -547,7 +553,7 @@ class CaptureManager:
 
     def start_capture(
         self,
-        output_dir: str = "/tmp/scitex_capture_screenshots",
+        output_dir: Optional[str] = None,
         interval: float = 1.0,
         jpeg: bool = True,
         quality: int = 60,
@@ -561,6 +567,9 @@ class CaptureManager:
         if self.worker and self.worker.running:
             print("Capture already running")
             return self.worker
+
+        if output_dir is None:
+            output_dir = str(get_screenshots_dir())
 
         self.worker = ScreenshotWorker(
             output_dir=output_dir,
@@ -607,7 +616,7 @@ class CaptureManager:
         if output_path is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             ext = "jpg" if jpeg else "png"
-            output_path = f"/tmp/screenshot_{timestamp}.{ext}"
+            output_path = str(get_screenshots_dir() / f"screenshot_{timestamp}.{ext}")
 
         worker = ScreenshotWorker(
             output_dir=str(Path(output_path).parent),
@@ -784,7 +793,10 @@ class CaptureManager:
                 if output_path is None:
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                     ext = "jpg" if jpeg else "png"
-                    output_path = f"/tmp/window_{window_handle}_{timestamp}.{ext}"
+                    output_path = str(
+                        get_screenshots_dir()
+                        / f"window_{window_handle}_{timestamp}.{ext}"
+                    )
 
                 # Decode base64 image
                 img_data = base64.b64decode(data.get("Base64Data", ""))
