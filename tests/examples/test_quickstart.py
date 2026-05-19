@@ -16,4 +16,4 @@ def test_quickstart_compiles_example_is_file():
 
 
 if __name__ == "__main__":
-    test_quickstart_compiles()
+    test_quickstart_compiles_example_is_file()
