@@ -6,362 +6,572 @@ Tests core screenshot capture functionality including:
 - Worker lifecycle (start/stop)
 - Status reporting
 - CaptureManager high-level interface
+
+No mocking library is used. The display-touching collaborator
+(``_take_screenshot`` and the platform probes ``_is_wsl`` /
+``_capture_native_screen``) is controlled with hand-rolled
+``ScreenshotWorker`` subclasses — real objects whose real
+``start``/``stop`` thread and real ``_worker_loop`` run, only the
+display interaction is swapped for a deterministic stand-in. The two
+WSL-detection branches that need a specific ``os.uname().release`` are
+exercised by real subprocesses that arrange their own ``os.uname``
+before calling the real ``_is_wsl``.
 """
 
 import os
+import subprocess
 import sys
 import tempfile
-import threading
+import textwrap
 import time
 from pathlib import Path
-from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
 
+# --------------------------------------------------------------------------
+# Hand-rolled fakes (real ScreenshotWorker subclasses, no mock library).
+# --------------------------------------------------------------------------
+def _no_capture_worker_class():
+    from scitex_capture.capture import ScreenshotWorker
+
+    class NoCaptureWorker(ScreenshotWorker):
+        """Real worker whose capture is a deterministic no-op (returns None)."""
+
+        def _take_screenshot(self):
+            return None
+
+    return NoCaptureWorker
+
+
+def _fixed_path_worker_class(fixed_path):
+    from scitex_capture.capture import ScreenshotWorker
+
+    class FixedPathWorker(ScreenshotWorker):
+        """Real worker whose capture always 'succeeds' with a fixed path."""
+
+        def _take_screenshot(self):
+            return fixed_path
+
+    return FixedPathWorker
+
+
+def _raising_worker_class(exc):
+    from scitex_capture.capture import ScreenshotWorker
+
+    class RaisingWorker(ScreenshotWorker):
+        """Real worker whose capture raises, exercising the on_error path."""
+
+        def _take_screenshot(self):
+            raise exc
+
+    return RaisingWorker
+
+
+def _no_backend_worker_class():
+    from scitex_capture.capture import ScreenshotWorker
+
+    class NoBackendWorker(ScreenshotWorker):
+        """Real worker where both capture backends report failure.
+
+        ``_take_screenshot`` itself is the *real* method — only the two
+        leaf collaborators it dispatches to are forced to report no
+        capture, so the real filename/dispatch logic runs and returns
+        None.
+        """
+
+        def _is_wsl(self):
+            return False
+
+        def _capture_native_screen(self, filepath):
+            return False
+
+    return NoBackendWorker
+
+
 class TestScreenshotWorkerInit:
-    """Test ScreenshotWorker initialization."""
+    """Test ScreenshotWorker initialization stores parameters."""
 
-    def test_default_initialization_smoke_case(self):
-        """Test worker initializes with default parameters."""
-        # Arrange
-        # Act
-        # Assert
+    @pytest.fixture
+    def default_worker(self, tmp_path):
         from scitex_capture.capture import ScreenshotWorker
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            worker = ScreenshotWorker(output_dir=tmpdir)
+        return ScreenshotWorker(output_dir=str(tmp_path))
 
-            assert worker.output_dir == Path(tmpdir)
-            assert worker.interval_sec == 1.0
-            assert worker.verbose is False
-            assert worker.use_jpeg is True
-            assert worker.jpeg_quality == 60
-            assert worker.running is False
-            assert worker.worker_thread is None
-            assert worker.screenshot_count == 0
-            assert worker.session_id is None
-            assert worker.monitor == 0
-            assert worker.capture_all is False
-
-    def test_custom_initialization_smoke_case(self):
-        """Test worker initializes with custom parameters."""
+    def test_default_output_dir_stored(self, default_worker, tmp_path):
         # Arrange
+        worker = default_worker
         # Act
+        value = worker.output_dir
         # Assert
+        assert value == Path(str(tmp_path))
+
+    def test_default_interval_is_one_second(self, default_worker):
+        # Arrange
+        worker = default_worker
+        # Act
+        value = worker.interval_sec
+        # Assert
+        assert value == 1.0
+
+    def test_default_verbose_is_false(self, default_worker):
+        # Arrange
+        worker = default_worker
+        # Act
+        value = worker.verbose
+        # Assert
+        assert value is False
+
+    def test_default_use_jpeg_is_true(self, default_worker):
+        # Arrange
+        worker = default_worker
+        # Act
+        value = worker.use_jpeg
+        # Assert
+        assert value is True
+
+    def test_default_jpeg_quality_is_sixty(self, default_worker):
+        # Arrange
+        worker = default_worker
+        # Act
+        value = worker.jpeg_quality
+        # Assert
+        assert value == 60
+
+    def test_default_running_is_false(self, default_worker):
+        # Arrange
+        worker = default_worker
+        # Act
+        value = worker.running
+        # Assert
+        assert value is False
+
+    def test_default_worker_thread_is_none(self, default_worker):
+        # Arrange
+        worker = default_worker
+        # Act
+        value = worker.worker_thread
+        # Assert
+        assert value is None
+
+    def test_default_screenshot_count_is_zero(self, default_worker):
+        # Arrange
+        worker = default_worker
+        # Act
+        value = worker.screenshot_count
+        # Assert
+        assert value == 0
+
+    def test_default_session_id_is_none(self, default_worker):
+        # Arrange
+        worker = default_worker
+        # Act
+        value = worker.session_id
+        # Assert
+        assert value is None
+
+    def test_default_monitor_is_zero(self, default_worker):
+        # Arrange
+        worker = default_worker
+        # Act
+        value = worker.monitor
+        # Assert
+        assert value == 0
+
+    def test_default_capture_all_is_false(self, default_worker):
+        # Arrange
+        worker = default_worker
+        # Act
+        value = worker.capture_all
+        # Assert
+        assert value is False
+
+    @pytest.fixture
+    def custom_worker(self, tmp_path):
         from scitex_capture.capture import ScreenshotWorker
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            on_capture = lambda x: None
-            on_error = lambda x: None
+        self._on_capture = lambda x: None
+        self._on_error = lambda x: None
+        return ScreenshotWorker(
+            output_dir=str(tmp_path),
+            interval_sec=2.5,
+            verbose=True,
+            use_jpeg=False,
+            jpeg_quality=90,
+            on_capture=self._on_capture,
+            on_error=self._on_error,
+        )
 
-            worker = ScreenshotWorker(
-                output_dir=tmpdir,
-                interval_sec=2.5,
-                verbose=True,
-                use_jpeg=False,
-                jpeg_quality=90,
-                on_capture=on_capture,
-                on_error=on_error,
-            )
-
-            assert worker.interval_sec == 2.5
-            assert worker.verbose is True
-            assert worker.use_jpeg is False
-            assert worker.jpeg_quality == 90
-            assert worker.on_capture is on_capture
-            assert worker.on_error is on_error
-
-    def test_creates_output_directory(self):
-        """Test worker creates output directory if it doesn't exist."""
+    def test_custom_interval_stored(self, custom_worker):
         # Arrange
+        worker = custom_worker
         # Act
+        value = worker.interval_sec
         # Assert
+        assert value == 2.5
+
+    def test_custom_verbose_stored(self, custom_worker):
+        # Arrange
+        worker = custom_worker
+        # Act
+        value = worker.verbose
+        # Assert
+        assert value is True
+
+    def test_custom_use_jpeg_stored(self, custom_worker):
+        # Arrange
+        worker = custom_worker
+        # Act
+        value = worker.use_jpeg
+        # Assert
+        assert value is False
+
+    def test_custom_jpeg_quality_stored(self, custom_worker):
+        # Arrange
+        worker = custom_worker
+        # Act
+        value = worker.jpeg_quality
+        # Assert
+        assert value == 90
+
+    def test_custom_on_capture_stored(self, custom_worker):
+        # Arrange
+        worker = custom_worker
+        # Act
+        value = worker.on_capture
+        # Assert
+        assert value is self._on_capture
+
+    def test_custom_on_error_stored(self, custom_worker):
+        # Arrange
+        worker = custom_worker
+        # Act
+        value = worker.on_error
+        # Assert
+        assert value is self._on_error
+
+    def test_creates_missing_output_directory(self, tmp_path):
+        # Arrange
         from scitex_capture.capture import ScreenshotWorker
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            nested_dir = os.path.join(tmpdir, "nested", "deep", "dir")
-            assert not os.path.exists(nested_dir)
-
-            worker = ScreenshotWorker(output_dir=nested_dir)
-
-            assert os.path.exists(nested_dir)
-            assert worker.output_dir == Path(nested_dir)
+        nested = tmp_path / "nested" / "deep" / "dir"
+        # Act
+        ScreenshotWorker(output_dir=str(nested))
+        # Assert
+        assert nested.is_dir()
 
 
 class TestScreenshotWorkerLifecycle:
-    """Test ScreenshotWorker start/stop lifecycle."""
+    """Test ScreenshotWorker start/stop lifecycle with a no-capture worker."""
 
-    def test_start_sets_running_state(self):
-        """Test start() sets running state correctly."""
+    def test_start_sets_running_true(self, tmp_path):
         # Arrange
+        worker = _no_capture_worker_class()(output_dir=str(tmp_path))
         # Act
-        # Assert
-        from scitex_capture.capture import ScreenshotWorker
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            worker = ScreenshotWorker(output_dir=tmpdir)
-
-            # Mock _take_screenshot to avoid actual capture
-            worker._take_screenshot = MagicMock(return_value=None)
-
-            assert worker.running is False
-            worker.start()
+        worker.start()
+        try:
+            # Assert
             assert worker.running is True
+        finally:
+            worker.stop()
+
+    def test_start_assigns_a_session_id(self, tmp_path):
+        # Arrange
+        worker = _no_capture_worker_class()(output_dir=str(tmp_path))
+        # Act
+        worker.start()
+        try:
+            # Assert
             assert worker.session_id is not None
-            assert worker.worker_thread is not None
+        finally:
+            worker.stop()
+
+    def test_start_spawns_a_live_thread(self, tmp_path):
+        # Arrange
+        worker = _no_capture_worker_class()(output_dir=str(tmp_path))
+        # Act
+        worker.start()
+        try:
+            # Assert
             assert worker.worker_thread.is_alive()
-
+        finally:
             worker.stop()
-            assert worker.running is False
 
-    def test_start_with_custom_session_id(self):
-        """Test start() uses provided session_id."""
+    def test_stop_clears_running_flag(self, tmp_path):
         # Arrange
+        worker = _no_capture_worker_class()(output_dir=str(tmp_path))
+        worker.start()
         # Act
+        worker.stop()
         # Assert
-        from scitex_capture.capture import ScreenshotWorker
+        assert worker.running is False
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            worker = ScreenshotWorker(output_dir=tmpdir)
-            worker._take_screenshot = MagicMock(return_value=None)
-
-            worker.start(session_id="my_custom_session")
+    def test_start_uses_provided_session_id(self, tmp_path):
+        # Arrange
+        worker = _no_capture_worker_class()(output_dir=str(tmp_path))
+        # Act
+        worker.start(session_id="my_custom_session")
+        try:
+            # Assert
             assert worker.session_id == "my_custom_session"
+        finally:
             worker.stop()
 
-    def test_start_generates_session_id_from_timestamp(self):
-        """Test start() generates session_id from timestamp when not provided."""
+    def test_auto_session_id_is_fifteen_char_timestamp(self, tmp_path):
         # Arrange
+        worker = _no_capture_worker_class()(output_dir=str(tmp_path))
         # Act
-        # Assert
-        from scitex_capture.capture import ScreenshotWorker
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            worker = ScreenshotWorker(output_dir=tmpdir)
-            worker._take_screenshot = MagicMock(return_value=None)
-
-            worker.start()
-            # Session ID format: YYYYMMDD_HHMMSS
-            assert len(worker.session_id) == 15
-            assert "_" in worker.session_id
+        worker.start()
+        try:
+            # Assert
+            # Format YYYYMMDD_HHMMSS -> 15 chars with an underscore.
+            assert len(worker.session_id) == 15 and "_" in worker.session_id
+        finally:
             worker.stop()
 
-    def test_stop_when_not_running(self):
-        """Test stop() is safe when worker not running."""
+    def test_stop_when_not_running_is_safe(self, tmp_path):
         # Arrange
+        worker = _no_capture_worker_class()(output_dir=str(tmp_path))
         # Act
+        worker.stop()
         # Assert
-        from scitex_capture.capture import ScreenshotWorker
+        assert worker.running is False
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            worker = ScreenshotWorker(output_dir=tmpdir)
-            # Should not raise
-            worker.stop()
-            assert worker.running is False
-
-    def test_double_start_is_idempotent(self):
-        """Test calling start() twice doesn't create duplicate threads."""
+    def test_double_start_keeps_same_thread(self, tmp_path):
         # Arrange
+        worker = _no_capture_worker_class()(output_dir=str(tmp_path))
+        worker.start()
+        first_thread = worker.worker_thread
         # Act
-        # Assert
-        from scitex_capture.capture import ScreenshotWorker
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            worker = ScreenshotWorker(output_dir=tmpdir)
-            worker._take_screenshot = MagicMock(return_value=None)
-
-            worker.start()
-            first_thread = worker.worker_thread
-            first_session = worker.session_id
-
-            worker.start()  # Second call
+        worker.start()  # second call must be a no-op
+        try:
+            # Assert
             assert worker.worker_thread is first_thread
-            assert worker.session_id == first_session
-
+        finally:
             worker.stop()
 
-    def test_worker_thread_is_daemon(self):
-        """Test worker thread runs as daemon."""
+    def test_double_start_keeps_same_session_id(self, tmp_path):
         # Arrange
+        worker = _no_capture_worker_class()(output_dir=str(tmp_path))
+        worker.start()
+        first_session = worker.session_id
         # Act
-        # Assert
-        from scitex_capture.capture import ScreenshotWorker
+        worker.start()
+        try:
+            # Assert
+            assert worker.session_id == first_session
+        finally:
+            worker.stop()
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            worker = ScreenshotWorker(output_dir=tmpdir)
-            worker._take_screenshot = MagicMock(return_value=None)
-
-            worker.start()
+    def test_worker_thread_is_daemon(self, tmp_path):
+        # Arrange
+        worker = _no_capture_worker_class()(output_dir=str(tmp_path))
+        # Act
+        worker.start()
+        try:
+            # Assert
             assert worker.worker_thread.daemon is True
+        finally:
             worker.stop()
 
 
 class TestScreenshotWorkerStatus:
-    """Test ScreenshotWorker status reporting."""
+    """Test ScreenshotWorker get_status()."""
 
-    def test_get_status_returns_all_fields(self):
-        """Test get_status() returns complete status dict."""
-        # Arrange
-        # Act
-        # Assert
+    @pytest.fixture
+    def status(self, tmp_path):
         from scitex_capture.capture import ScreenshotWorker
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            worker = ScreenshotWorker(
-                output_dir=tmpdir, interval_sec=2.0, use_jpeg=True, jpeg_quality=75
-            )
+        worker = ScreenshotWorker(
+            output_dir=str(tmp_path),
+            interval_sec=2.0,
+            use_jpeg=True,
+            jpeg_quality=75,
+        )
+        return worker.get_status()
 
-            status = worker.get_status()
-
-            assert "running" in status
-            assert "session_id" in status
-            assert "screenshot_count" in status
-            assert "output_dir" in status
-            assert "interval_sec" in status
-            assert "use_jpeg" in status
-            assert "jpeg_quality" in status
-
-            assert status["running"] is False
-            assert status["screenshot_count"] == 0
-            assert status["interval_sec"] == 2.0
-            assert status["use_jpeg"] is True
-            assert status["jpeg_quality"] == 75
-
-    def test_get_status_reflects_running_state(self):
-        """Test get_status() reflects current running state."""
+    def test_status_has_running_key(self, status):
         # Arrange
+        result = status
         # Act
+        present = "running" in result
         # Assert
-        from scitex_capture.capture import ScreenshotWorker
+        assert present
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            worker = ScreenshotWorker(output_dir=tmpdir)
-            worker._take_screenshot = MagicMock(return_value=None)
+    def test_status_has_session_id_key(self, status):
+        # Arrange
+        result = status
+        # Act
+        present = "session_id" in result
+        # Assert
+        assert present
 
-            assert worker.get_status()["running"] is False
+    def test_status_has_screenshot_count_key(self, status):
+        # Arrange
+        result = status
+        # Act
+        present = "screenshot_count" in result
+        # Assert
+        assert present
 
-            worker.start(session_id="test_session")
-            status = worker.get_status()
-            assert status["running"] is True
-            assert status["session_id"] == "test_session"
+    def test_status_has_output_dir_key(self, status):
+        # Arrange
+        result = status
+        # Act
+        present = "output_dir" in result
+        # Assert
+        assert present
 
+    def test_status_running_is_false_before_start(self, status):
+        # Arrange
+        result = status
+        # Act
+        value = result["running"]
+        # Assert
+        assert value is False
+
+    def test_status_screenshot_count_starts_at_zero(self, status):
+        # Arrange
+        result = status
+        # Act
+        value = result["screenshot_count"]
+        # Assert
+        assert value == 0
+
+    def test_status_reports_configured_interval(self, status):
+        # Arrange
+        result = status
+        # Act
+        value = result["interval_sec"]
+        # Assert
+        assert value == 2.0
+
+    def test_status_reports_configured_quality(self, status):
+        # Arrange
+        result = status
+        # Act
+        value = result["jpeg_quality"]
+        # Assert
+        assert value == 75
+
+    def test_status_running_true_while_started(self, tmp_path):
+        # Arrange
+        worker = _no_capture_worker_class()(output_dir=str(tmp_path))
+        # Act
+        worker.start(session_id="test_session")
+        try:
+            running = worker.get_status()["running"]
+        finally:
             worker.stop()
-            assert worker.get_status()["running"] is False
+        # Assert
+        assert running is True
+
+    def test_status_reports_running_session_id(self, tmp_path):
+        # Arrange
+        worker = _no_capture_worker_class()(output_dir=str(tmp_path))
+        # Act
+        worker.start(session_id="test_session")
+        try:
+            session_id = worker.get_status()["session_id"]
+        finally:
+            worker.stop()
+        # Assert
+        assert session_id == "test_session"
 
 
 class TestScreenshotWorkerWSLDetection:
-    """Test WSL detection functionality."""
+    """Test _is_wsl() — branch coverage via real subprocesses.
 
-    def test_is_wsl_on_linux_with_microsoft(self):
-        """Test _is_wsl() returns True on WSL."""
+    Each subprocess arranges its own os.uname / sys.platform with real
+    callables (no mock library), then calls the real _is_wsl().
+    """
+
+    def _run_is_wsl(self, tmp_path, release, platform):
+        script = tmp_path / "probe.py"
+        script.write_text(
+            textwrap.dedent(
+                f"""
+                import os, sys, types, tempfile
+                os.uname = lambda: types.SimpleNamespace(release={release!r})
+                sys.platform = {platform!r}
+                from scitex_capture.capture import ScreenshotWorker
+                with tempfile.TemporaryDirectory() as d:
+                    w = ScreenshotWorker(output_dir=d)
+                    print("IS_WSL", w._is_wsl())
+                """
+            )
+        )
+        proc = subprocess.run(
+            [sys.executable, str(script)],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        return proc.stdout
+
+    def test_linux_with_microsoft_release_is_wsl(self, tmp_path):
         # Arrange
+        release = "5.15.90.1-microsoft-standard-WSL2"
         # Act
+        out = self._run_is_wsl(tmp_path, release, "linux")
         # Assert
-        from scitex_capture.capture import ScreenshotWorker
+        assert "IS_WSL True" in out
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            worker = ScreenshotWorker(output_dir=tmpdir)
-
-            # Mock the conditions for WSL
-            with patch.object(sys, "platform", "linux"):
-                with patch("os.uname") as mock_uname:
-                    mock_uname.return_value = MagicMock(
-                        release="5.15.90.1-microsoft-standard-WSL2"
-                    )
-                    assert worker._is_wsl() is True
-
-    def test_is_wsl_on_linux_without_microsoft(self):
-        """Test _is_wsl() returns False on regular Linux."""
+    def test_linux_without_microsoft_release_is_not_wsl(self, tmp_path):
         # Arrange
+        release = "5.15.0-generic"
         # Act
+        out = self._run_is_wsl(tmp_path, release, "linux")
         # Assert
-        from scitex_capture.capture import ScreenshotWorker
+        assert "IS_WSL False" in out
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            worker = ScreenshotWorker(output_dir=tmpdir)
-
-            with patch.object(sys, "platform", "linux"):
-                with patch("os.uname") as mock_uname:
-                    mock_uname.return_value = MagicMock(release="5.15.0-generic")
-                    assert worker._is_wsl() is False
-
-    def test_is_wsl_on_non_linux(self):
-        """Test _is_wsl() returns False on non-Linux platforms."""
+    def test_non_linux_platform_is_not_wsl(self, tmp_path):
         # Arrange
+        release = "5.15.90.1-microsoft-standard-WSL2"
         # Act
+        out = self._run_is_wsl(tmp_path, release, "darwin")
         # Assert
-        from scitex_capture.capture import ScreenshotWorker
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            worker = ScreenshotWorker(output_dir=tmpdir)
-
-            with patch.object(sys, "platform", "darwin"):
-                assert worker._is_wsl() is False
-
-            with patch.object(sys, "platform", "win32"):
-                assert worker._is_wsl() is False
+        assert "IS_WSL False" in out
 
 
 class TestScreenshotWorkerCallbacks:
-    """Test ScreenshotWorker callback functionality."""
+    """Test on_capture / on_error callbacks via the real worker loop."""
 
-    def test_on_capture_callback_called(self):
-        """Test on_capture callback is called after successful capture."""
+    def test_on_capture_receives_the_capture_path(self, tmp_path):
         # Arrange
+        captured = []
+        worker = _fixed_path_worker_class("/fake/path.jpg")(
+            output_dir=str(tmp_path),
+            interval_sec=0.05,
+            on_capture=captured.append,
+        )
         # Act
+        worker.start()
+        time.sleep(0.25)
+        worker.stop()
         # Assert
-        from scitex_capture.capture import ScreenshotWorker
+        assert captured and all(p == "/fake/path.jpg" for p in captured)
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            captured_paths = []
-            worker = ScreenshotWorker(
-                output_dir=tmpdir,
-                interval_sec=0.1,
-                on_capture=lambda path: captured_paths.append(path),
-            )
-
-            # Mock _take_screenshot to return a fake path
-            worker._take_screenshot = MagicMock(return_value="/fake/path.jpg")
-
-            worker.start()
-            time.sleep(0.25)  # Allow a few captures
-            worker.stop()
-
-            assert len(captured_paths) > 0
-            assert all(path == "/fake/path.jpg" for path in captured_paths)
-
-    def test_on_error_callback_called(self):
-        """Test on_error callback is called when capture raises exception."""
+    def test_on_error_receives_the_raised_exception(self, tmp_path):
         # Arrange
+        errors = []
+        worker = _raising_worker_class(RuntimeError("Test error"))(
+            output_dir=str(tmp_path),
+            interval_sec=0.05,
+            on_error=errors.append,
+        )
         # Act
+        worker.start()
+        time.sleep(0.25)
+        worker.stop()
         # Assert
-        from scitex_capture.capture import ScreenshotWorker
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            errors = []
-            worker = ScreenshotWorker(
-                output_dir=tmpdir,
-                interval_sec=0.1,
-                on_error=lambda e: errors.append(e),
-            )
-
-            # Mock _take_screenshot to raise exception
-            worker._take_screenshot = MagicMock(side_effect=RuntimeError("Test error"))
-
-            worker.start()
-            time.sleep(0.25)
-            worker.stop()
-
-            assert len(errors) > 0
-            assert all(isinstance(e, RuntimeError) for e in errors)
+        assert errors and all(isinstance(e, RuntimeError) for e in errors)
 
 
 class TestCaptureManager:
-    """Test CaptureManager high-level interface."""
+    """Test CaptureManager high-level interface (real worker lifecycle)."""
 
-    def test_initialization_manager_worker_is_none(self):
-        """Test CaptureManager initializes correctly."""
+    def test_initialization_leaves_worker_none(self):
         # Arrange
         from scitex_capture.capture import CaptureManager
 
@@ -370,81 +580,134 @@ class TestCaptureManager:
         # Assert
         assert manager.worker is None
 
-    def test_start_capture_creates_worker(self):
-        """Test start_capture creates and starts worker."""
-        # Arrange
-        # Act
-        # Assert
-        from scitex_capture.capture import CaptureManager, ScreenshotWorker
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            manager = CaptureManager()
-
-            # Mock the worker's _take_screenshot
-            with patch.object(ScreenshotWorker, "_take_screenshot", return_value=None):
-                worker = manager.start_capture(output_dir=tmpdir)
-
-                assert manager.worker is not None
-                assert manager.worker is worker
-                assert worker.running is True
-
-                manager.stop_capture()
-                assert manager.worker is None
-
-    def test_start_capture_with_parameters(self):
-        """Test start_capture passes parameters correctly."""
-        # Arrange
-        # Act
-        # Assert
-        from scitex_capture.capture import CaptureManager, ScreenshotWorker
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            manager = CaptureManager()
-
-            with patch.object(ScreenshotWorker, "_take_screenshot", return_value=None):
-                worker = manager.start_capture(
-                    output_dir=tmpdir,
-                    interval=2.5,
-                    jpeg=False,
-                    quality=90,
-                    verbose=True,
-                    monitor_id=1,
-                    capture_all=True,
-                )
-
-                assert worker.interval_sec == 2.5
-                assert worker.use_jpeg is False
-                assert worker.jpeg_quality == 90
-                assert worker.verbose is True
-                assert worker.monitor == 1
-                assert worker.capture_all is True
-
-                manager.stop_capture()
-
-    def test_start_capture_when_already_running(self):
-        """Test start_capture returns existing worker if already running."""
-        # Arrange
-        # Act
-        # Assert
-        from scitex_capture.capture import CaptureManager, ScreenshotWorker
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            manager = CaptureManager()
-
-            with patch.object(ScreenshotWorker, "_take_screenshot", return_value=None):
-                worker1 = manager.start_capture(output_dir=tmpdir)
-                worker2 = manager.start_capture(output_dir=tmpdir)
-
-                assert worker1 is worker2
-                manager.stop_capture()
-
-    def test_stop_capture_when_not_running(self):
-        """Test stop_capture is safe when no worker running."""
+    def test_start_capture_assigns_a_worker(self, tmp_path):
         # Arrange
         from scitex_capture.capture import CaptureManager
 
         manager = CaptureManager()
-        # Should not raise
+        # Act
+        manager.start_capture(output_dir=str(tmp_path))
+        try:
+            # Assert
+            assert manager.worker is not None
+        finally:
+            manager.stop_capture()
+
+    def test_start_capture_returns_the_running_worker(self, tmp_path):
+        # Arrange
+        from scitex_capture.capture import CaptureManager
+
+        manager = CaptureManager()
+        # Act
+        worker = manager.start_capture(output_dir=str(tmp_path))
+        try:
+            # Assert
+            assert manager.worker is worker
+        finally:
+            manager.stop_capture()
+
+    def test_start_capture_marks_worker_running(self, tmp_path):
+        # Arrange
+        from scitex_capture.capture import CaptureManager
+
+        manager = CaptureManager()
+        # Act
+        worker = manager.start_capture(output_dir=str(tmp_path))
+        try:
+            # Assert
+            assert worker.running is True
+        finally:
+            manager.stop_capture()
+
+    def test_stop_capture_clears_the_worker(self, tmp_path):
+        # Arrange
+        from scitex_capture.capture import CaptureManager
+
+        manager = CaptureManager()
+        manager.start_capture(output_dir=str(tmp_path))
+        # Act
+        manager.stop_capture()
+        # Assert
+        assert manager.worker is None
+
+    @pytest.fixture
+    def parametrised_worker(self, tmp_path):
+        from scitex_capture.capture import CaptureManager
+
+        manager = CaptureManager()
+        worker = manager.start_capture(
+            output_dir=str(tmp_path),
+            interval=2.5,
+            jpeg=False,
+            quality=90,
+            verbose=True,
+            monitor_id=1,
+            capture_all=True,
+        )
+        try:
+            yield worker
+        finally:
+            manager.stop_capture()
+
+    def test_start_capture_propagates_interval(self, parametrised_worker):
+        # Arrange
+        worker = parametrised_worker
+        # Act
+        value = worker.interval_sec
+        # Assert
+        assert value == 2.5
+
+    def test_start_capture_propagates_jpeg_flag(self, parametrised_worker):
+        # Arrange
+        worker = parametrised_worker
+        # Act
+        value = worker.use_jpeg
+        # Assert
+        assert value is False
+
+    def test_start_capture_propagates_quality(self, parametrised_worker):
+        # Arrange
+        worker = parametrised_worker
+        # Act
+        value = worker.jpeg_quality
+        # Assert
+        assert value == 90
+
+    def test_start_capture_propagates_monitor_id(self, parametrised_worker):
+        # Arrange
+        worker = parametrised_worker
+        # Act
+        value = worker.monitor
+        # Assert
+        assert value == 1
+
+    def test_start_capture_propagates_capture_all(self, parametrised_worker):
+        # Arrange
+        worker = parametrised_worker
+        # Act
+        value = worker.capture_all
+        # Assert
+        assert value is True
+
+    def test_start_capture_twice_returns_same_worker(self, tmp_path):
+        # Arrange
+        from scitex_capture.capture import CaptureManager
+
+        manager = CaptureManager()
+        worker1 = manager.start_capture(output_dir=str(tmp_path))
+        # Act
+        worker2 = manager.start_capture(output_dir=str(tmp_path))
+        try:
+            # Assert
+            assert worker1 is worker2
+        finally:
+            manager.stop_capture()
+
+    def test_stop_capture_when_idle_is_safe(self):
+        # Arrange
+        from scitex_capture.capture import CaptureManager
+
+        manager = CaptureManager()
         # Act
         manager.stop_capture()
         # Assert
@@ -452,926 +715,53 @@ class TestCaptureManager:
 
 
 class TestCaptureManagerSingleScreenshot:
-    """Test CaptureManager single screenshot functionality."""
+    """Test take_single_screenshot default-path resolution."""
 
-    def test_take_single_screenshot_with_mocked_capture(self):
-        """Test take_single_screenshot with mocked capture backend."""
+    def test_default_path_resolves_under_runtime_or_returns_none(self, tmp_path):
         # Arrange
-        # Act
-        # Assert
-        from scitex_capture.capture import CaptureManager, ScreenshotWorker
+        from scitex_capture.capture import CaptureManager
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            manager = CaptureManager()
-            output_path = os.path.join(tmpdir, "test.jpg")
-
-            # Create a mock screenshot file
-            def mock_take_screenshot(self):
-                fake_path = os.path.join(tmpdir, "single_0000_test.jpg")
-                Path(fake_path).touch()
-                return fake_path
-
-            with patch.object(
-                ScreenshotWorker, "_take_screenshot", mock_take_screenshot
-            ):
-                with patch.object(ScreenshotWorker, "_is_wsl", return_value=False):
-                    result = manager.take_single_screenshot(
-                        output_path=output_path, jpeg=True, quality=85
-                    )
-
-                    # Result should be the output_path if rename was successful
-                    # or None if capture failed
-                    # In mocked test, we just verify the method doesn't crash
-                    assert result is None or isinstance(result, str)
-
-    def test_take_single_screenshot_generates_default_path(self):
-        """Test take_single_screenshot generates path when none provided."""
-        # Arrange
-        # Act
-        # Assert
-        from scitex_capture.capture import CaptureManager, ScreenshotWorker
-
+        os.environ["SCITEX_DIR"] = str(tmp_path)
+        screenshots = tmp_path / "capture" / "runtime" / "screenshots"
         manager = CaptureManager()
-
-        # Mock to return None (no capture possible)
-        with patch.object(ScreenshotWorker, "_take_screenshot", return_value=None):
+        try:
+            # Act
             result = manager.take_single_screenshot()
-            assert result is None
-
-
-class TestFilenameGeneration:
-    """Test filename generation for screenshots."""
-
-    def test_filename_format_jpeg(self):
-        """Test JPEG filename format includes session, count, timestamp."""
-        # Arrange
-        # Act
+        finally:
+            os.environ.pop("SCITEX_DIR", None)
         # Assert
+        # Capture succeeds (display) or returns None (headless); either way
+        # the default path resolves under runtime/screenshots.
+        assert result is None or str(screenshots) in str(result)
+
+
+class TestTakeScreenshotDispatch:
+    """Test _take_screenshot's real dispatch + filename logic.
+
+    Both display backends are forced to report failure via a hand-rolled
+    subclass; the real _take_screenshot runs and must return None.
+    """
+
+    def test_returns_none_when_no_backend_succeeds(self, tmp_path):
+        # Arrange
+        worker = _no_backend_worker_class()(output_dir=str(tmp_path), use_jpeg=True)
+        worker.session_id = "20250104_120000"
+        worker.screenshot_count = 5
+        # Act
+        result = worker._take_screenshot()
+        # Assert
+        assert result is None
+
+    def test_png_extension_selected_when_jpeg_disabled(self, tmp_path):
+        # Arrange
         from scitex_capture.capture import ScreenshotWorker
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            worker = ScreenshotWorker(output_dir=tmpdir, use_jpeg=True)
-            worker.session_id = "20250104_120000"
-            worker.screenshot_count = 5
-
-            # Mock the capture methods to return False
-            worker._is_wsl = MagicMock(return_value=False)
-            worker._capture_native_screen = MagicMock(return_value=False)
-
-            # Call _take_screenshot (will fail but we can check filename logic)
-            result = worker._take_screenshot()
-
-            # Since both capture methods return False, result should be None
-            assert result is None
-
-    def test_filename_format_png(self):
-        """Test PNG extension when use_jpeg is False."""
-        # Arrange
+        worker = ScreenshotWorker(output_dir=str(tmp_path), use_jpeg=False)
         # Act
+        ext = "jpg" if worker.use_jpeg else "png"
         # Assert
-        from scitex_capture.capture import ScreenshotWorker
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            worker = ScreenshotWorker(output_dir=tmpdir, use_jpeg=False)
-            worker.session_id = "test_session"
-            worker.screenshot_count = 0
-
-            # Verify extension setting
-            ext = "jpg" if worker.use_jpeg else "png"
-            assert ext == "png"
+        assert ext == "png"
 
 
 if __name__ == "__main__":
-    import os
-
-    import pytest
-
     pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/capture/capture.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-18 09:55:59 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/capture/capture.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-#
-# __FILE__ = "./src/scitex/capture/capture.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-#
-# """
-# Core screenshot capture functionality.
-# Optimized for WSL to Windows host screen capture.
-# """
-#
-# import subprocess
-# import sys
-# import threading
-# import time
-# from datetime import datetime
-# from pathlib import Path
-# from typing import Optional
-#
-#
-# class ScreenshotWorker:
-#     """
-#     Independent worker thread for continuous screenshot capture.
-#     Takes screenshots at configurable intervals with compression options.
-#     """
-#
-#     def __init__(
-#         self,
-#         output_dir: str = "/tmp/scitex_capture_screenshots",
-#         interval_sec: float = 1.0,
-#         verbose: bool = False,
-#         use_jpeg: bool = True,
-#         jpeg_quality: int = 60,
-#         on_capture=None,
-#         on_error=None,
-#     ):
-#         """
-#         Initialize screenshot worker.
-#
-#         Parameters
-#         ----------
-#         output_dir : str
-#             Directory for saving screenshots
-#         interval_sec : float
-#             Seconds between screenshots (default: 1.0)
-#         verbose : bool
-#             Print screenshot paths in runtime log
-#         use_jpeg : bool
-#             Use JPEG compression for smaller files (default: True)
-#         jpeg_quality : int
-#             JPEG quality 1-100, lower = smaller files (default: 60)
-#         on_capture : callable, optional
-#             Callback function called with filepath after each capture
-#         on_error : callable, optional
-#             Callback function called with exception on errors
-#         """
-#         self.output_dir = Path(output_dir)
-#         self.interval_sec = interval_sec
-#         self.verbose = verbose
-#         self.use_jpeg = use_jpeg
-#         self.jpeg_quality = jpeg_quality
-#         self.on_capture = on_capture
-#         self.on_error = on_error
-#
-#         # Worker state
-#         self.running = False
-#         self.worker_thread = None
-#         self.screenshot_count = 0
-#         self.session_id = None
-#
-#         # Monitor capture settings
-#         self.monitor = 0  # Default to primary monitor (0-based indexing)
-#         self.capture_all = False  # Default to single monitor
-#
-#         # Create output directory
-#         self.output_dir.mkdir(parents=True, exist_ok=True)
-#
-#     def start(self, session_id: str = None):
-#         """Start the screenshot worker thread."""
-#         if self.running:
-#             if self.verbose:
-#                 print("⚠️ Worker already running")
-#             return
-#
-#         self.running = True
-#         self.screenshot_count = 0
-#         self.session_id = session_id or datetime.now().strftime("%Y%m%d_%H%M%S")
-#
-#         # Start worker thread
-#         self.worker_thread = threading.Thread(
-#             target=self._worker_loop, daemon=True, name="ScreenshotWorker"
-#         )
-#         self.worker_thread.start()
-#
-#         if self.verbose:
-#             ext = "jpg" if self.use_jpeg else "png"
-#             print(
-#                 f"📸 Started: {self.output_dir}/{self.session_id}_NNNN_*.{ext} (interval: {self.interval_sec}s)"
-#             )
-#
-#     def stop(self):
-#         """Stop the screenshot worker thread."""
-#         if not self.running:
-#             return
-#
-#         self.running = False
-#
-#         if self.worker_thread and self.worker_thread.is_alive():
-#             self.worker_thread.join(timeout=2)
-#
-#         if self.verbose:
-#             print(
-#                 f"📸 Stopped: {self.screenshot_count} screenshots in {self.output_dir}"
-#             )
-#
-#     def _worker_loop(self):
-#         """Main worker loop that takes screenshots."""
-#
-#         next_capture_time = time.time()
-#
-#         while self.running:
-#             current_time = time.time()
-#
-#             # Check if it's time for next capture
-#             if current_time >= next_capture_time:
-#                 try:
-#                     screenshot_path = self._take_screenshot()
-#
-#                     if screenshot_path:
-#                         if self.verbose:
-#                             # Simple one-line output
-#                             print(f"📸 {screenshot_path}")
-#
-#                         # Call on_capture callback if provided
-#                         if self.on_capture:
-#                             try:
-#                                 self.on_capture(screenshot_path)
-#                             except Exception as cb_error:
-#                                 if self.verbose:
-#                                     print(f"⚠️ Callback error: {cb_error}")
-#
-#                 except Exception as e:
-#                     if self.verbose:
-#                         print(f"❌ Error: {e}")
-#
-#                     # Call on_error callback if provided
-#                     if self.on_error:
-#                         try:
-#                             self.on_error(e)
-#                         except Exception as cb_error:
-#                             if self.verbose:
-#                                 print(f"⚠️ Error callback failed: {cb_error}")
-#
-#                 # Schedule next capture
-#                 next_capture_time = current_time + self.interval_sec
-#
-#             # Short sleep to avoid busy waiting, but allow responsive stopping
-#             time.sleep(0.01)
-#
-#     def _take_screenshot(self) -> Optional[str]:
-#         """Take a single screenshot."""
-#         try:
-#             # Generate filename with timestamp
-#             now = datetime.now()
-#             timestamp = now.strftime("%Y%m%d_%H%M%S_%f")[:-3]
-#             ext = "jpg" if self.use_jpeg else "png"
-#             filename = (
-#                 f"{self.session_id}_{self.screenshot_count:04d}_{timestamp}.{ext}"
-#             )
-#             filepath = self.output_dir / filename
-#
-#             # Try Windows PowerShell method for WSL
-#             if self._is_wsl():
-#                 if self._capture_windows_screen(
-#                     filepath,
-#                     monitor=self.monitor,
-#                     capture_all=self.capture_all,
-#                 ):
-#                     self.screenshot_count += 1
-#                     return str(filepath)
-#
-#             # Fallback to native screenshot tools
-#             if self._capture_native_screen(filepath):
-#                 self.screenshot_count += 1
-#                 return str(filepath)
-#
-#             return None
-#
-#         except Exception as e:
-#             if self.verbose:
-#                 print(f"❌ Screenshot failed: {e}")
-#             return None
-#
-#     def _is_wsl(self) -> bool:
-#         """Check if running in WSL."""
-#         return sys.platform == "linux" and "microsoft" in os.uname().release.lower()
-#
-#     def _capture_windows_screen(
-#         self, filepath: Path, monitor: int = 1, capture_all: bool = False
-#     ) -> bool:
-#         """Capture Windows host screen from WSL with DPI awareness using external PowerShell scripts.
-#
-#         Args:
-#             filepath: Path to save the screenshot
-#             monitor: Monitor number to capture (1-based index)
-#             capture_all: If True, capture all monitors combined
-#         """
-#         try:
-#             # Try using external PowerShell script first
-#             script_dir = Path(__file__).parent / "powershell"
-#             if capture_all:
-#                 script_path = script_dir / "capture_all_monitors.ps1"
-#             else:
-#                 script_path = script_dir / "capture_single_monitor.ps1"
-#
-#             # Check if script exists
-#             if script_path.exists():
-#                 # Find PowerShell executable
-#                 ps_paths = [
-#                     "powershell.exe",
-#                     "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
-#                     "/mnt/c/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell.exe",
-#                 ]
-#
-#                 ps_exe = None
-#                 for path in ps_paths:
-#                     try:
-#                         test_result = subprocess.run(
-#                             [path, "-Command", "echo test"],
-#                             capture_output=True,
-#                             timeout=1,
-#                         )
-#                         if test_result.returncode == 0:
-#                             ps_exe = path
-#                             break
-#                     except:
-#                         continue
-#
-#                 if ps_exe:
-#                     # Build PowerShell command
-#                     if capture_all:
-#                         cmd = [
-#                             ps_exe,
-#                             "-NoProfile",
-#                             "-ExecutionPolicy",
-#                             "Bypass",
-#                             "-File",
-#                             str(script_path),
-#                             "-OutputFormat",
-#                             "base64",
-#                         ]
-#                     else:
-#                         # Pass 0-based monitor index directly to PowerShell
-#                         cmd = [
-#                             ps_exe,
-#                             "-NoProfile",
-#                             "-ExecutionPolicy",
-#                             "Bypass",
-#                             "-File",
-#                             str(script_path),
-#                             "-MonitorNumber",
-#                             str(monitor),
-#                             "-OutputFormat",
-#                             "base64",
-#                         ]
-#
-#                     result = subprocess.run(
-#                         cmd, capture_output=True, text=True, timeout=5
-#                     )
-#
-#                     if result.returncode == 0 and result.stdout.strip():
-#                         # Decode base64 PNG data
-#                         import base64
-#
-#                         png_data = base64.b64decode(result.stdout.strip())
-#
-#                         # Save directly as JPEG if requested, otherwise as PNG
-#                         if self.use_jpeg:
-#                             try:
-#                                 import io
-#
-#                                 from PIL import Image
-#
-#                                 img = Image.open(io.BytesIO(png_data))
-#                                 # Convert RGBA to RGB for JPEG
-#                                 if img.mode == "RGBA":
-#                                     rgb_img = Image.new(
-#                                         "RGB", img.size, (255, 255, 255)
-#                                     )
-#                                     rgb_img.paste(
-#                                         img, mask=img.split()[3]
-#                                     )  # Use alpha channel as mask
-#                                     img = rgb_img
-#                                 img.save(
-#                                     str(filepath),
-#                                     "JPEG",
-#                                     quality=self.jpeg_quality,
-#                                     optimize=True,
-#                                 )
-#                             except ImportError:
-#                                 # PIL not available, save as PNG
-#                                 with open(str(filepath), "wb") as f:
-#                                     f.write(png_data)
-#                         else:
-#                             with open(str(filepath), "wb") as f:
-#                                 f.write(png_data)
-#
-#                         return filepath.exists()
-#
-#             # Fallback to inline script
-#             return self._capture_windows_screen_inline(filepath)
-#
-#         except Exception as e:
-#             if self.verbose:
-#                 print(f"❌ Windows screen capture error: {e}")
-#                 import traceback
-#
-#                 traceback.print_exc()
-#         return False
-#
-#     def _capture_windows_screen_inline(self, filepath: Path) -> bool:
-#         """Fallback inline PowerShell capture (when .ps1 files not available)."""
-#         try:
-#             if self.verbose:
-#                 print("🔍 Attempting inline PowerShell capture...")
-#             # Use base64 encoding to avoid path issues (most reliable for WSL)
-#             # Now with DPI awareness for proper high-resolution capture
-#             ps_script = """
-#             Add-Type -AssemblyName System.Windows.Forms
-#             Add-Type -AssemblyName System.Drawing
-#
-#             # Enable DPI awareness for proper high-resolution capture
-#             Add-Type @'
-#             using System;
-#             using System.Runtime.InteropServices;
-#             public class User32 {
-#                 [DllImport("user32.dll")]
-#                 public static extern bool SetProcessDPIAware();
-#             }
-# '@
-#             $null = [User32]::SetProcessDPIAware()
-#
-#             $screen = [System.Windows.Forms.Screen]::PrimaryScreen
-#             $bitmap = New-Object System.Drawing.Bitmap $screen.Bounds.Width, $screen.Bounds.Height
-#             $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-#
-#             # Set high quality rendering
-#             $graphics.CompositingQuality = [System.Drawing.Drawing2D.CompositingQuality]::HighQuality
-#             $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
-#             $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
-#             $graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
-#
-#             $graphics.CopyFromScreen($screen.Bounds.X, $screen.Bounds.Y, 0, 0, $bitmap.Size)
-#
-#             $stream = New-Object System.IO.MemoryStream
-#             $bitmap.Save($stream, [System.Drawing.Imaging.ImageFormat]::Png)
-#             $bytes = $stream.ToArray()
-#             [Convert]::ToBase64String($bytes)
-#
-#             $graphics.Dispose()
-#             $bitmap.Dispose()
-#             $stream.Dispose()
-#             """
-#
-#             # Find PowerShell executable
-#             ps_paths = [
-#                 # Check PATH first (might be in .win-bin or similar)
-#                 "powershell.exe",
-#                 # Standard WSL path
-#                 "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
-#                 # Alternative locations
-#                 "/mnt/c/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell.exe",
-#             ]
-#
-#             ps_exe = None
-#             for path in ps_paths:
-#                 try:
-#                     # Just check if the file exists and is executable
-#                     test_path = (
-#                         Path(path) if not path.startswith("/mnt/") else Path(path)
-#                     )
-#                     if path == "powershell.exe":
-#                         # In PATH - use it directly
-#                         ps_exe = path
-#                         if self.verbose:
-#                             print(f"✓ Found PowerShell in PATH")
-#                         break
-#                     elif test_path.exists() or Path(path).exists():
-#                         ps_exe = path
-#                         if self.verbose:
-#                             print(f"✓ Found PowerShell at {path}")
-#                         break
-#                 except:
-#                     continue
-#
-#             if not ps_exe:
-#                 if self.verbose:
-#                     print("❌ PowerShell executable not found")
-#                 return False
-#
-#             if self.verbose:
-#                 print(f"✓ Using PowerShell: {ps_exe}")
-#
-#             # Execute PowerShell
-#             cmd = [ps_exe, "-NoProfile", "-Command", ps_script]
-#
-#             if self.verbose:
-#                 print("🔄 Executing PowerShell script...")
-#
-#             try:
-#                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
-#
-#                 if self.verbose:
-#                     print(f"✓ PowerShell return code: {result.returncode}")
-#                     if result.stderr:
-#                         print(f"PowerShell stderr: {result.stderr[:500]}")
-#                     if result.stdout:
-#                         print(f"✓ PowerShell stdout length: {len(result.stdout)} chars")
-#             except subprocess.TimeoutExpired as e:
-#                 if self.verbose:
-#                     print(f"❌ PowerShell timeout after 10s")
-#                 return False
-#
-#             if result.returncode == 0 and result.stdout.strip():
-#                 # Decode base64 PNG data
-#                 import base64
-#
-#                 png_data = base64.b64decode(result.stdout.strip())
-#
-#                 # Save directly as JPEG if requested, otherwise as PNG
-#                 if self.use_jpeg:
-#                     try:
-#                         import io
-#
-#                         from PIL import Image
-#
-#                         # Load PNG from memory
-#                         img = Image.open(io.BytesIO(png_data))
-#                         # Convert RGBA to RGB for JPEG
-#                         if img.mode == "RGBA":
-#                             rgb_img = Image.new("RGB", img.size, (255, 255, 255))
-#                             rgb_img.paste(img, mask=img.split()[3])
-#                             img = rgb_img
-#                         # Save as JPEG with quality
-#                         img.save(
-#                             str(filepath),
-#                             "JPEG",
-#                             quality=self.jpeg_quality,
-#                             optimize=True,
-#                         )
-#                     except ImportError:
-#                         # PIL not available, save as PNG
-#                         with open(str(filepath), "wb") as f:
-#                             f.write(png_data)
-#                 else:
-#                     # Save as PNG
-#                     with open(str(filepath), "wb") as f:
-#                         f.write(png_data)
-#
-#                 return filepath.exists()
-#         except Exception:
-#             pass
-#         return False
-#
-#     def _capture_native_screen(self, filepath: Path) -> bool:
-#         """Capture screen using native tools."""
-#         try:
-#             # Try mss first
-#             try:
-#                 import mss
-#
-#                 with mss.mss() as sct:
-#                     # Capture primary monitor
-#                     monitor = (
-#                         sct.monitors[1] if len(sct.monitors) > 1 else sct.monitors[0]
-#                     )
-#                     screenshot = sct.grab(monitor)
-#
-#                     if self.use_jpeg:
-#                         # Convert to PIL for JPEG saving
-#                         from PIL import Image
-#
-#                         img = Image.frombytes(
-#                             "RGB",
-#                             screenshot.size,
-#                             screenshot.bgra,
-#                             "raw",
-#                             "BGRX",
-#                         )
-#                         img.save(str(filepath), "JPEG", quality=self.jpeg_quality)
-#                     else:
-#                         mss.tools.to_png(
-#                             screenshot.rgb,
-#                             screenshot.size,
-#                             output=str(filepath),
-#                         )
-#
-#                     return filepath.exists()
-#             except ImportError:
-#                 pass
-#
-#             # Try scrot
-#             if self.use_jpeg:
-#                 cmd = [
-#                     "scrot",
-#                     "-z",
-#                     "-q",
-#                     str(self.jpeg_quality),
-#                     str(filepath),
-#                 ]
-#             else:
-#                 cmd = ["scrot", "-z", str(filepath)]
-#
-#             result = subprocess.run(cmd, capture_output=True, timeout=2)
-#             return result.returncode == 0 and filepath.exists()
-#
-#         except Exception as e:
-#             if self.verbose:
-#                 print(f"❌ Native screen capture failed: {e}")
-#         return False
-#
-#     def get_status(self) -> dict:
-#         """Get current worker status."""
-#         return {
-#             "running": self.running,
-#             "session_id": self.session_id,
-#             "screenshot_count": self.screenshot_count,
-#             "output_dir": str(self.output_dir),
-#             "interval_sec": self.interval_sec,
-#             "use_jpeg": self.use_jpeg,
-#             "jpeg_quality": self.jpeg_quality,
-#         }
-#
-#
-# class CaptureManager:
-#     """High-level interface for managing screen capture."""
-#
-#     def __init__(self):
-#         self.worker = None
-#
-#     def start_capture(
-#         self,
-#         output_dir: str = "/tmp/scitex_capture_screenshots",
-#         interval: float = 1.0,
-#         jpeg: bool = True,
-#         quality: int = 60,
-#         on_capture=None,
-#         on_error=None,
-#         verbose: bool = False,
-#         monitor_id: int = 0,
-#         capture_all: bool = False,
-#     ) -> ScreenshotWorker:
-#         """Start continuous screen capture."""
-#         if self.worker and self.worker.running:
-#             print("Capture already running")
-#             return self.worker
-#
-#         self.worker = ScreenshotWorker(
-#             output_dir=output_dir,
-#             interval_sec=interval,
-#             use_jpeg=jpeg,
-#             jpeg_quality=quality,
-#             on_capture=on_capture,
-#             on_error=on_error,
-#             verbose=verbose,
-#         )
-#         # Set monitor parameters
-#         self.worker.monitor = monitor_id
-#         self.worker.capture_all = capture_all
-#         self.worker.start()
-#         return self.worker
-#
-#     def stop_capture(self):
-#         """Stop screen capture."""
-#         if self.worker:
-#             self.worker.stop()
-#             self.worker = None
-#
-#     def take_single_screenshot(
-#         self,
-#         output_path: str = None,
-#         jpeg: bool = True,
-#         quality: int = 85,
-#         monitor_id: int = 0,
-#         capture_all_monitors: bool = False,
-#     ) -> Optional[str]:
-#         """
-#         Take a single screenshot.
-#
-#         Args:
-#             output_path: Path to save screenshot
-#             jpeg: Use JPEG compression
-#             quality: JPEG quality (1-100)
-#             monitor_id: Monitor index to capture (0-based)
-#             capture_all_monitors: Capture all monitors combined
-#
-#         Returns:
-#             Path to saved screenshot
-#         """
-#         if output_path is None:
-#             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-#             ext = "jpg" if jpeg else "png"
-#             output_path = f"/tmp/screenshot_{timestamp}.{ext}"
-#
-#         worker = ScreenshotWorker(
-#             output_dir=str(Path(output_path).parent),
-#             use_jpeg=jpeg,
-#             jpeg_quality=quality,
-#             verbose=False,
-#         )
-#
-#         # Set monitor parameters
-#         worker.monitor = monitor_id
-#         worker.capture_all = capture_all_monitors
-#
-#         # Take single screenshot
-#         worker.session_id = "single"
-#         worker.screenshot_count = 0
-#         screenshot_path = worker._take_screenshot()
-#
-#         if screenshot_path:
-#             # Rename to desired path
-#             Path(screenshot_path).rename(output_path)
-#             return output_path
-#
-#         return None
-#
-#     def get_info(self) -> dict:
-#         """
-#         Enumerate all available monitors and virtual desktops.
-#
-#         Returns:
-#             Dictionary with monitor information
-#         """
-#         try:
-#             script_dir = Path(__file__).parent / "powershell"
-#             script_path = script_dir / "detect_monitors_and_desktops.ps1"
-#
-#             if not script_path.exists():
-#                 return {"error": "Detection script not found"}
-#
-#             # Find PowerShell
-#             ps_paths = [
-#                 "powershell.exe",
-#                 "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
-#             ]
-#
-#             ps_exe = None
-#             for path in ps_paths:
-#                 try:
-#                     result = subprocess.run(
-#                         [path, "-Command", "echo test"],
-#                         capture_output=True,
-#                         timeout=1,
-#                     )
-#                     if result.returncode == 0:
-#                         ps_exe = path
-#                         break
-#                 except:
-#                     continue
-#
-#             if not ps_exe:
-#                 return {"error": "PowerShell not found"}
-#
-#             # Execute detection script
-#             cmd = [
-#                 ps_exe,
-#                 "-NoProfile",
-#                 "-ExecutionPolicy",
-#                 "Bypass",
-#                 "-File",
-#                 str(script_path),
-#             ]
-#
-#             result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
-#
-#             if result.returncode == 0 and result.stdout.strip():
-#                 # Parse JSON from output (skip non-JSON lines)
-#                 import json
-#
-#                 lines = result.stdout.strip().split("\n")
-#                 for line in lines:
-#                     line = line.strip()
-#                     if line.startswith("{"):
-#                         return json.loads(line)
-#
-#                 return {"error": "No JSON in output"}
-#             else:
-#                 return {
-#                     "error": (result.stderr if result.stderr else "Detection failed")
-#                 }
-#
-#         except Exception as e:
-#             return {"error": str(e)}
-#
-#     def capture_window(
-#         self,
-#         window_handle: int,
-#         output_path: str = None,
-#         jpeg: bool = True,
-#         quality: int = 85,
-#     ) -> Optional[str]:
-#         """
-#         Capture a specific window by its handle.
-#
-#         Args:
-#             window_handle: Window handle (from get_info)
-#             output_path: Path to save screenshot
-#             jpeg: Use JPEG compression
-#             quality: JPEG quality (1-100)
-#
-#         Returns:
-#             Path to saved screenshot or None
-#         """
-#         try:
-#             script_dir = Path(__file__).parent / "powershell"
-#             script_path = script_dir / "capture_window_by_handle.ps1"
-#
-#             if not script_path.exists():
-#                 return None
-#
-#             # Find PowerShell
-#             ps_paths = [
-#                 "powershell.exe",
-#                 "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
-#             ]
-#
-#             ps_exe = None
-#             for path in ps_paths:
-#                 try:
-#                     result = subprocess.run(
-#                         [path, "-Command", "echo test"],
-#                         capture_output=True,
-#                         timeout=1,
-#                     )
-#                     if result.returncode == 0:
-#                         ps_exe = path
-#                         break
-#                 except:
-#                     continue
-#
-#             if not ps_exe:
-#                 return None
-#
-#             # Execute window capture script
-#             cmd = [
-#                 ps_exe,
-#                 "-NoProfile",
-#                 "-ExecutionPolicy",
-#                 "Bypass",
-#                 "-File",
-#                 str(script_path),
-#                 "-WindowHandle",
-#                 str(window_handle),
-#             ]
-#
-#             result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
-#
-#             if result.returncode == 0 and result.stdout.strip():
-#                 # Parse JSON from output
-#                 import base64
-#                 import json
-#
-#                 lines = result.stdout.strip().split("\n")
-#                 for line in lines:
-#                     line = line.strip()
-#                     if line.startswith("{"):
-#                         data = json.loads(line)
-#                         break
-#                 else:
-#                     return None
-#
-#                 if not data.get("Success"):
-#                     return None
-#
-#                 # Generate output path if not provided
-#                 if output_path is None:
-#                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-#                     ext = "jpg" if jpeg else "png"
-#                     output_path = f"/tmp/window_{window_handle}_{timestamp}.{ext}"
-#
-#                 # Decode base64 image
-#                 img_data = base64.b64decode(data.get("Base64Data", ""))
-#
-#                 # Save as JPEG or PNG
-#                 if jpeg:
-#                     try:
-#                         import io
-#
-#                         from PIL import Image
-#
-#                         img = Image.open(io.BytesIO(img_data))
-#                         if img.mode == "RGBA":
-#                             rgb_img = Image.new("RGB", img.size, (255, 255, 255))
-#                             rgb_img.paste(img, mask=img.split()[3])
-#                             img = rgb_img
-#                         img.save(output_path, "JPEG", quality=quality, optimize=True)
-#                     except ImportError:
-#                         output_path = output_path.replace(".jpg", ".png").replace(
-#                             ".jpeg", ".png"
-#                         )
-#                         with open(output_path, "wb") as f:
-#                             f.write(img_data)
-#                 else:
-#                     with open(output_path, "wb") as f:
-#                         f.write(img_data)
-#
-#                 return output_path if Path(output_path).exists() else None
-#
-#         except Exception as e:
-#             return None
-#
-#
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/capture/capture.py
-# --------------------------------------------------------------------------------

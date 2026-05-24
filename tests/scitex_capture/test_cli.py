@@ -17,52 +17,56 @@ from click.testing import CliRunner
 from scitex_capture.cli import main
 
 
-def test_main_help_exits_zero_result_exit_code_equals_n_0():
+def test_main_help_exits_zero():
     # Arrange
-    # Arrange
+    runner = CliRunner()
     # Act
-    result = CliRunner().invoke(main, ["--help"])
-    # Act
-    # Assert
+    result = runner.invoke(main, ["--help"])
     # Assert
     assert result.exit_code == 0
 
 
-def test_main_help_exits_zero_scitex_capture_in_result_output():
+def test_main_help_mentions_package_name():
     # Arrange
-    # Arrange
+    runner = CliRunner()
     # Act
-    result = CliRunner().invoke(main, ["--help"])
-    # Act
-    # Assert
+    result = runner.invoke(main, ["--help"])
     # Assert
     assert "scitex-capture" in result.output
 
 
-
-
-def test_main_version_flag():
+def test_main_version_flag_exits_zero():
     # Arrange
+    runner = CliRunner()
     # Act
-    result = CliRunner().invoke(main, ["--version"])
+    result = runner.invoke(main, ["--version"])
     # Assert
     assert result.exit_code == 0
 
 
-def test_help_recursive_lists_subcommands():
+def test_help_recursive_exits_zero():
     # Arrange
+    runner = CliRunner()
     # Act
-    result = CliRunner().invoke(main, ["--help-recursive"])
+    result = runner.invoke(main, ["--help-recursive"])
     # Assert
     assert result.exit_code == 0
-    for sub in (
+
+
+def test_help_recursive_lists_every_subcommand():
+    # Arrange
+    runner = CliRunner()
+    expected = {
         "list-windows",
         "show-info",
         "start-monitor",
         "stop-monitor",
         "make-gif",
-    ):
-        assert sub in result.output, f"subcommand {sub!r} missing from help"
+    }
+    # Act
+    result = runner.invoke(main, ["--help-recursive"])
+    # Assert
+    assert {s for s in expected if s in result.output} == expected
 
 
 def test_list_windows_help():

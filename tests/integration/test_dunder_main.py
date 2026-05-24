@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """Tests for scitex_capture.__main__ module.
 
-Tests the entry point for python -m scitex.capture:
+Tests the entry point for `python -m scitex_capture`:
 - Module imports
 - Main function accessibility
-- Module execution
+- Module execution as a real subprocess
 """
 
-import os
 import subprocess
 import sys
-from unittest.mock import patch
 
 import pytest
 
@@ -18,8 +16,7 @@ import pytest
 class TestModuleImports:
     """Test module import functionality."""
 
-    def test_module_importable_main_is_not_none(self):
-        """Test __main__ module can be imported."""
+    def test_dunder_main_module_is_importable(self):
         # Arrange
         # Act
         from scitex_capture import __main__
@@ -27,8 +24,7 @@ class TestModuleImports:
         # Assert
         assert __main__ is not None
 
-    def test_main_accessible_callable_main(self):
-        """Test main function is accessible from module."""
+    def test_main_callable_is_accessible(self):
         # Arrange
         # Act
         from scitex_capture.__main__ import main
@@ -36,10 +32,10 @@ class TestModuleImports:
         # Assert
         assert callable(main)
 
-    def test_main_is_from_cli(self):
-        """Test main function is imported from cli module."""
+    def test_main_is_the_cli_main_object(self):
         # Arrange
         from scitex_capture.__main__ import main
+
         # Act
         from scitex_capture.cli import main as cli_main
 
@@ -48,127 +44,68 @@ class TestModuleImports:
 
 
 class TestModuleExecution:
-    """Test module execution as script."""
+    """Test module execution as a script via a real subprocess."""
 
-    def test_module_runnable_with_help_result_returncode_equals_n_0(self):
-        # Arrange
-        # Arrange
-        # Act
-        result = subprocess.run(
-            [sys.executable, "-m", "scitex_capture", "--help"],
+    def _run_module(self, *args):
+        return subprocess.run(
+            [sys.executable, "-m", "scitex_capture", *args],
             capture_output=True,
             text=True,
-            timeout=10,
+            timeout=15,
         )
+
+    def test_help_invocation_exits_zero(self):
+        # Arrange
         # Act
-        # Assert
+        result = self._run_module("--help")
         # Assert
         assert result.returncode == 0
 
-    def test_module_runnable_with_help_usage_in_result_stdout_lower_or_help_in_result_stdout_lower(self):
-        # Arrange
-        # Arrange
-        # Act
-        result = subprocess.run(
-            [sys.executable, "-m", "scitex_capture", "--help"],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        # Act
-        # Assert
-        # Assert
-        assert "usage" in result.stdout.lower() or "help" in result.stdout.lower()
-
-
-    def test_module_execution_calls_main(self):
-        """Test module execution calls main function."""
+    def test_help_invocation_emits_usage_or_help_text(self):
         # Arrange
         # Act
+        result = self._run_module("--help")
         # Assert
-        from scitex_capture import __main__
-
-        with patch.object(__main__, "main", return_value=0) as mock_main:
-            # Simulate running as __main__
-            with patch.object(__main__, "__name__", "__main__"):
-                # The actual execution happens at import time,
-                # so we test the structure
-                assert hasattr(__main__, "main")
-                assert callable(__main__.main)
-
-    def test_module_returns_main_exit_code(self):
-        """`python -m scitex_capture --help` exits 0 (sys.exit forwards Click's exit)."""
-        # Arrange
-        # Act
-        result = subprocess.run(
-            [sys.executable, "-m", "scitex_capture", "--help"],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        # Assert
-        assert result.returncode == 0
+        out = result.stdout.lower()
+        assert "usage" in out or "help" in out
 
 
 class TestModuleIntegration:
-    """Test module integration with CLI."""
+    """Test module integration with the CLI subcommands."""
 
-    def test_help_output_contains_capture_commands_list_windows_in_help_text(self):
-        # Arrange
-        # Arrange
-        result = subprocess.run(
-            [sys.executable, "-m", "scitex_capture", "--help"],
+    def _run_module(self, *args):
+        return subprocess.run(
+            [sys.executable, "-m", "scitex_capture", *args],
             capture_output=True,
             text=True,
-            timeout=10,
+            timeout=15,
         )
-        # Act
-        help_text = result.stdout.lower()
-        # Act
-        # Assert
-        # Assert
-        assert "list-windows" in help_text
 
-    def test_help_output_contains_capture_commands_show_info_in_help_text(self):
-        # Arrange
-        # Arrange
-        result = subprocess.run(
-            [sys.executable, "-m", "scitex_capture", "--help"],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        # Act
-        help_text = result.stdout.lower()
-        # Act
-        # Assert
-        # Assert
-        assert "show-info" in help_text
-
-
-    def test_list_windows_help_via_module(self):
-        """`list-windows --help` exits 0 — flag-shape was renamed to subcommand."""
+    def test_help_text_lists_list_windows_subcommand(self):
         # Arrange
         # Act
-        result = subprocess.run(
-            [sys.executable, "-m", "scitex_capture", "list-windows", "--help"],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
+        result = self._run_module("--help")
+        # Assert
+        assert "list-windows" in result.stdout.lower()
+
+    def test_help_text_lists_show_info_subcommand(self):
+        # Arrange
+        # Act
+        result = self._run_module("--help")
+        # Assert
+        assert "show-info" in result.stdout.lower()
+
+    def test_list_windows_help_via_module_exits_zero(self):
+        # Arrange
+        # Act
+        result = self._run_module("list-windows", "--help")
         # Assert
         assert result.returncode == 0
 
-    def test_show_info_help_via_module(self):
-        """`show-info --help` exits 0 — flag-shape was renamed to subcommand."""
+    def test_show_info_help_via_module_exits_zero(self):
         # Arrange
         # Act
-        result = subprocess.run(
-            [sys.executable, "-m", "scitex_capture", "show-info", "--help"],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
+        result = self._run_module("show-info", "--help")
         # Assert
         assert result.returncode == 0
 
@@ -176,8 +113,7 @@ class TestModuleIntegration:
 class TestModuleAttributes:
     """Test module-level attributes."""
 
-    def test_module_has_file_attribute(self):
-        """Test module has __FILE__ attribute."""
+    def test_module_exposes_file_attribute(self):
         # Arrange
         # Act
         from scitex_capture import __main__
@@ -185,8 +121,7 @@ class TestModuleAttributes:
         # Assert
         assert hasattr(__main__, "__FILE__")
 
-    def test_module_has_dir_attribute(self):
-        """Test module has __DIR__ attribute."""
+    def test_module_exposes_dir_attribute(self):
         # Arrange
         # Act
         from scitex_capture import __main__
@@ -194,53 +129,8 @@ class TestModuleAttributes:
         # Assert
         assert hasattr(__main__, "__DIR__")
 
-    def test_module_docstring_exists(self):
-        """Test module has a docstring."""
-        # Arrange
-        # Act
-        from scitex_capture import __main__
-
-        # The docstring is in the source but may not be __doc__
-        # Check the source structure is correct
-        # Assert
-        assert __main__ is not None
-
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
     pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/capture/__main__.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-18 09:55:55 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/capture/__main__.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-#
-# __FILE__ = "./src/scitex/capture/__main__.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-#
-# """
-# Entry point for python -m scitex.capture
-# """
-#
-# import sys
-#
-# from .cli import main
-#
-# if __name__ == "__main__":
-#     sys.exit(main())
-#
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/capture/__main__.py
-# --------------------------------------------------------------------------------

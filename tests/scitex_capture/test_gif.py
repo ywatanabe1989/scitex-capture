@@ -1,28 +1,38 @@
 #!/usr/bin/env python3
 """Tests for scitex_capture.gif module.
 
-Tests GIF creation functionality:
+Tests GIF creation functionality with *real* PIL images written to
+TemporaryDirectories:
 - GifCreator class methods
 - create_gif_from_files()
 - create_gif_from_session()
 - create_gif_from_pattern()
 - Session detection
+
+The "PIL not installed" branch is exercised by a real subprocess whose
+PYTHONPATH contains a stub ``PIL`` package that raises ImportError — no
+mocking of ``sys.modules``.
 """
 
 import os
+import subprocess
 import sys
 import tempfile
+import textwrap
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
 
 
-class TestGifCreatorInit:
-    """Test GifCreator initialization."""
+def _make_jpg(path, size=(100, 100), color=(255, 0, 0)):
+    """Write a real JPEG to ``path`` (importorskip-gated on PIL)."""
+    Image = pytest.importorskip("PIL.Image")
+    Image.new("RGB", size, color=color).save(path, "JPEG")
+    return path
 
-    def test_initialization_creator_is_not_none(self):
-        """Test GifCreator initializes correctly."""
+
+class TestGifCreatorInit:
+    def test_gifcreator_instantiates_without_error(self):
         # Arrange
         from scitex_capture.gif import GifCreator
 
@@ -33,524 +43,396 @@ class TestGifCreatorInit:
 
 
 class TestCreateGifFromFiles:
-    """Test create_gif_from_files functionality."""
+    """Behavioural tests for create_gif_from_files with real images."""
 
-    def test_create_gif_with_valid_images(self):
-        """Test GIF creation with valid image files."""
+    @pytest.fixture
+    def three_frames(self, tmp_path):
+        paths = []
+        for i in range(3):
+            p = tmp_path / f"frame_{i}.jpg"
+            _make_jpg(p, color=(255 - i * 50, i * 50, 0))
+            paths.append(str(p))
+        return paths
+
+    def test_valid_images_return_a_path(self, three_frames, tmp_path):
         # Arrange
-        # Act
-        # Assert
         from scitex_capture.gif import GifCreator
 
-        try:
-            from PIL import Image
-        except ImportError:
-            pytest.skip("PIL not available")
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # Create test images
-            image_paths = []
-            for i in range(3):
-                img_path = os.path.join(tmpdir, f"frame_{i}.jpg")
-                img = Image.new("RGB", (100, 100), color=(255 - i * 50, i * 50, 0))
-                img.save(img_path, "JPEG")
-                image_paths.append(img_path)
-
-            output_path = os.path.join(tmpdir, "output.gif")
-            creator = GifCreator()
-            result = creator.create_gif_from_files(
-                image_paths=image_paths, output_path=output_path
-            )
-
-            assert result is not None
-            assert os.path.exists(result)
-            assert result.endswith(".gif")
-
-    def test_create_gif_empty_paths(self):
-        """Test GIF creation with empty paths list."""
-        # Arrange
+        out = str(tmp_path / "output.gif")
         # Act
+        result = GifCreator().create_gif_from_files(
+            image_paths=three_frames, output_path=out
+        )
         # Assert
+        assert result is not None
+
+    def test_valid_images_write_the_gif_to_disk(self, three_frames, tmp_path):
+        # Arrange
         from scitex_capture.gif import GifCreator
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            output_path = os.path.join(tmpdir, "output.gif")
-            creator = GifCreator()
-            result = creator.create_gif_from_files(
-                image_paths=[], output_path=output_path
-            )
-
-            assert result is None
-
-    def test_create_gif_nonexistent_paths(self):
-        """Test GIF creation with nonexistent image paths."""
-        # Arrange
+        out = str(tmp_path / "output.gif")
         # Act
+        result = GifCreator().create_gif_from_files(
+            image_paths=three_frames, output_path=out
+        )
         # Assert
+        assert os.path.exists(result)
+
+    def test_valid_images_return_path_with_gif_suffix(self, three_frames, tmp_path):
+        # Arrange
         from scitex_capture.gif import GifCreator
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            output_path = os.path.join(tmpdir, "output.gif")
-            creator = GifCreator()
-            result = creator.create_gif_from_files(
-                image_paths=["/nonexistent/image1.jpg", "/nonexistent/image2.jpg"],
-                output_path=output_path,
-            )
-
-            assert result is None
-
-    def test_create_gif_with_duration(self):
-        """Test GIF creation with custom duration."""
-        # Arrange
+        out = str(tmp_path / "output.gif")
         # Act
+        result = GifCreator().create_gif_from_files(
+            image_paths=three_frames, output_path=out
+        )
         # Assert
+        assert result.endswith(".gif")
+
+    def test_empty_paths_return_none(self, tmp_path):
+        # Arrange
         from scitex_capture.gif import GifCreator
 
-        try:
-            from PIL import Image
-        except ImportError:
-            pytest.skip("PIL not available")
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # Create test images
-            image_paths = []
-            for i in range(2):
-                img_path = os.path.join(tmpdir, f"frame_{i}.jpg")
-                img = Image.new("RGB", (50, 50), color="blue")
-                img.save(img_path, "JPEG")
-                image_paths.append(img_path)
-
-            output_path = os.path.join(tmpdir, "output.gif")
-            creator = GifCreator()
-            result = creator.create_gif_from_files(
-                image_paths=image_paths, output_path=output_path, duration=1.0
-            )
-
-            assert result is not None
-
-    def test_create_gif_with_different_sizes(self):
-        """Test GIF creation with images of different sizes."""
-        # Arrange
+        out = str(tmp_path / "output.gif")
         # Act
+        result = GifCreator().create_gif_from_files(image_paths=[], output_path=out)
         # Assert
+        assert result is None
+
+    def test_nonexistent_paths_return_none(self, tmp_path):
+        # Arrange
         from scitex_capture.gif import GifCreator
 
-        try:
-            from PIL import Image
-        except ImportError:
-            pytest.skip("PIL not available")
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # Create images with different sizes
-            img1_path = os.path.join(tmpdir, "frame_1.jpg")
-            img2_path = os.path.join(tmpdir, "frame_2.jpg")
-
-            Image.new("RGB", (100, 100), "red").save(img1_path)
-            Image.new("RGB", (200, 200), "blue").save(img2_path)
-
-            output_path = os.path.join(tmpdir, "output.gif")
-            creator = GifCreator()
-            result = creator.create_gif_from_files(
-                image_paths=[img1_path, img2_path], output_path=output_path
-            )
-
-            assert result is not None
-
-    def test_create_gif_creates_output_directory(self):
-        """Test GIF creation creates parent directory."""
-        # Arrange
+        out = str(tmp_path / "output.gif")
         # Act
+        result = GifCreator().create_gif_from_files(
+            image_paths=["/nonexistent/a.jpg", "/nonexistent/b.jpg"],
+            output_path=out,
+        )
         # Assert
+        assert result is None
+
+    def test_custom_duration_returns_a_path(self, tmp_path):
+        # Arrange
         from scitex_capture.gif import GifCreator
 
-        try:
-            from PIL import Image
-        except ImportError:
-            pytest.skip("PIL not available")
+        paths = [
+            _make_jpg(tmp_path / f"f{i}.jpg", size=(50, 50), color="blue")
+            for i in range(2)
+        ]
+        out = str(tmp_path / "output.gif")
+        # Act
+        result = GifCreator().create_gif_from_files(
+            image_paths=[str(p) for p in paths], output_path=out, duration=1.0
+        )
+        # Assert
+        assert result is not None
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            img_path = os.path.join(tmpdir, "frame.jpg")
-            Image.new("RGB", (50, 50), "green").save(img_path)
+    def test_mismatched_sizes_are_handled(self, tmp_path):
+        # Arrange
+        from scitex_capture.gif import GifCreator
 
-            # Output to nested nonexistent directory
-            output_path = os.path.join(tmpdir, "nested", "deep", "output.gif")
-            creator = GifCreator()
-            result = creator.create_gif_from_files(
-                image_paths=[img_path], output_path=output_path
-            )
+        img1 = _make_jpg(tmp_path / "f1.jpg", size=(100, 100), color="red")
+        img2 = _make_jpg(tmp_path / "f2.jpg", size=(200, 200), color="blue")
+        out = str(tmp_path / "output.gif")
+        # Act
+        result = GifCreator().create_gif_from_files(
+            image_paths=[str(img1), str(img2)], output_path=out
+        )
+        # Assert
+        assert result is not None
 
-            assert result is not None
-            assert os.path.exists(os.path.dirname(output_path))
+    def test_creates_missing_parent_directory(self, tmp_path):
+        # Arrange
+        from scitex_capture.gif import GifCreator
+
+        img = _make_jpg(tmp_path / "frame.jpg", size=(50, 50), color="green")
+        out = str(tmp_path / "nested" / "deep" / "output.gif")
+        # Act
+        GifCreator().create_gif_from_files(image_paths=[str(img)], output_path=out)
+        # Assert
+        assert os.path.isdir(os.path.dirname(out))
 
 
 class TestCreateGifFromSession:
-    """Test create_gif_from_session functionality."""
+    """Behavioural tests for create_gif_from_session."""
 
-    def test_create_gif_from_session_no_files(self):
-        """Test GIF creation from session with no matching files."""
+    def _make_session_frames(self, tmp_path, session_id, count, ext="jpg"):
+        for i in range(count):
+            name = f"{session_id}_{i:04d}_120000000.{ext}"
+            _make_jpg(tmp_path / name, color="red")
+
+    def test_no_matching_files_returns_none(self, tmp_path):
         # Arrange
-        # Act
-        # Assert
         from scitex_capture.gif import GifCreator
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            creator = GifCreator()
-            result = creator.create_gif_from_session(
-                session_id="20250104_120000", screenshot_dir=tmpdir
-            )
-
-            assert result is None
-
-    def test_create_gif_from_session_with_files(self):
-        """Test GIF creation from session with matching files."""
-        # Arrange
         # Act
+        result = GifCreator().create_gif_from_session(
+            session_id="20250104_120000", screenshot_dir=str(tmp_path)
+        )
         # Assert
+        assert result is None
+
+    def test_matching_files_return_a_path(self, tmp_path):
+        # Arrange
         from scitex_capture.gif import GifCreator
 
-        try:
+        session_id = "20250104_120000"
+        self._make_session_frames(tmp_path, session_id, 3)
+        # Act
+        result = GifCreator().create_gif_from_session(
+            session_id=session_id, screenshot_dir=str(tmp_path)
+        )
+        # Assert
+        assert result is not None
+
+    def test_matching_files_embed_session_id_in_output(self, tmp_path):
+        # Arrange
+        from scitex_capture.gif import GifCreator
+
+        session_id = "20250104_120000"
+        self._make_session_frames(tmp_path, session_id, 3)
+        # Act
+        result = GifCreator().create_gif_from_session(
+            session_id=session_id, screenshot_dir=str(tmp_path)
+        )
+        # Assert
+        assert session_id in result
+
+    def test_png_only_session_falls_back_to_png(self, tmp_path):
+        # Arrange
+        from scitex_capture.gif import GifCreator
+
+        session_id = "20250104_130000"
+        for i in range(2):
+            name = f"{session_id}_{i:04d}_130000000.png"
+            pytest.importorskip("PIL.Image")
             from PIL import Image
-        except ImportError:
-            pytest.skip("PIL not available")
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            session_id = "20250104_120000"
-
-            # Create session files
-            for i in range(3):
-                img_path = os.path.join(tmpdir, f"{session_id}_{i:04d}_120000000.jpg")
-                Image.new("RGB", (100, 100), "red").save(img_path)
-
-            creator = GifCreator()
-            result = creator.create_gif_from_session(
-                session_id=session_id, screenshot_dir=tmpdir
-            )
-
-            assert result is not None
-            assert session_id in result
-
-    def test_create_gif_from_session_png_fallback(self):
-        """Test GIF creation falls back to PNG files."""
-        # Arrange
+            Image.new("RGB", (100, 100), "blue").save(tmp_path / name)
         # Act
+        result = GifCreator().create_gif_from_session(
+            session_id=session_id, screenshot_dir=str(tmp_path)
+        )
         # Assert
+        assert result is not None
+
+    def test_max_frames_limit_still_returns_a_path(self, tmp_path):
+        # Arrange
         from scitex_capture.gif import GifCreator
 
-        try:
-            from PIL import Image
-        except ImportError:
-            pytest.skip("PIL not available")
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            session_id = "20250104_130000"
-
-            # Create PNG files (no JPG)
-            for i in range(2):
-                img_path = os.path.join(tmpdir, f"{session_id}_{i:04d}_130000000.png")
-                Image.new("RGB", (100, 100), "blue").save(img_path)
-
-            creator = GifCreator()
-            result = creator.create_gif_from_session(
-                session_id=session_id, screenshot_dir=tmpdir
-            )
-
-            assert result is not None
-
-    def test_create_gif_from_session_max_frames(self):
-        """Test GIF creation with max_frames limit."""
-        # Arrange
+        session_id = "20250104_140000"
+        self._make_session_frames(tmp_path, session_id, 10)
         # Act
+        result = GifCreator().create_gif_from_session(
+            session_id=session_id, screenshot_dir=str(tmp_path), max_frames=3
+        )
         # Assert
-        from scitex_capture.gif import GifCreator
-
-        try:
-            from PIL import Image
-        except ImportError:
-            pytest.skip("PIL not available")
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            session_id = "20250104_140000"
-
-            # Create many session files
-            for i in range(10):
-                img_path = os.path.join(tmpdir, f"{session_id}_{i:04d}_140000000.jpg")
-                Image.new("RGB", (50, 50), "green").save(img_path)
-
-            creator = GifCreator()
-            result = creator.create_gif_from_session(
-                session_id=session_id, screenshot_dir=tmpdir, max_frames=3
-            )
-
-            assert result is not None
+        assert result is not None
 
 
 class TestCreateGifFromPattern:
-    """Test create_gif_from_pattern functionality."""
+    """Behavioural tests for create_gif_from_pattern."""
 
-    def test_create_gif_from_pattern_no_matches(self):
-        """Test GIF creation with no matching files."""
+    def test_no_matches_returns_none(self, tmp_path):
         # Arrange
-        # Act
-        # Assert
         from scitex_capture.gif import GifCreator
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            pattern = os.path.join(tmpdir, "nonexistent_*.jpg")
-            creator = GifCreator()
-            result = creator.create_gif_from_pattern(pattern=pattern)
-
-            assert result is None
-
-    def test_create_gif_from_pattern_with_matches(self):
-        """Test GIF creation with matching files."""
-        # Arrange
+        pattern = str(tmp_path / "nonexistent_*.jpg")
         # Act
+        result = GifCreator().create_gif_from_pattern(pattern=pattern)
         # Assert
+        assert result is None
+
+    def test_matches_return_a_path(self, tmp_path):
+        # Arrange
         from scitex_capture.gif import GifCreator
 
-        try:
-            from PIL import Image
-        except ImportError:
-            pytest.skip("PIL not available")
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # Create matching files
-            for i in range(3):
-                img_path = os.path.join(tmpdir, f"screenshot_{i}.jpg")
-                Image.new("RGB", (100, 100), "purple").save(img_path)
-
-            pattern = os.path.join(tmpdir, "screenshot_*.jpg")
-            output_path = os.path.join(tmpdir, "result.gif")
-            creator = GifCreator()
-            result = creator.create_gif_from_pattern(
-                pattern=pattern, output_path=output_path
-            )
-
-            assert result is not None
-            assert os.path.exists(result)
-
-    def test_create_gif_from_pattern_auto_output_path(self):
-        """Test GIF creation generates output path automatically."""
-        # Arrange
+        for i in range(3):
+            _make_jpg(tmp_path / f"screenshot_{i}.jpg", color="purple")
+        pattern = str(tmp_path / "screenshot_*.jpg")
+        out = str(tmp_path / "result.gif")
         # Act
+        result = GifCreator().create_gif_from_pattern(pattern=pattern, output_path=out)
         # Assert
+        assert result is not None
+
+    def test_matches_write_the_gif_to_disk(self, tmp_path):
+        # Arrange
         from scitex_capture.gif import GifCreator
 
-        try:
-            from PIL import Image
-        except ImportError:
-            pytest.skip("PIL not available")
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # Create matching files
-            img_path = os.path.join(tmpdir, "test_image.jpg")
-            Image.new("RGB", (50, 50), "yellow").save(img_path)
-
-            pattern = os.path.join(tmpdir, "test_*.jpg")
-            creator = GifCreator()
-            result = creator.create_gif_from_pattern(pattern=pattern)
-
-            assert result is not None
-            assert "gif_summary_" in result
-
-    def test_create_gif_from_pattern_max_frames(self):
-        """Test GIF creation from pattern with max_frames."""
-        # Arrange
+        for i in range(3):
+            _make_jpg(tmp_path / f"screenshot_{i}.jpg", color="purple")
+        pattern = str(tmp_path / "screenshot_*.jpg")
+        out = str(tmp_path / "result.gif")
         # Act
+        result = GifCreator().create_gif_from_pattern(pattern=pattern, output_path=out)
         # Assert
+        assert os.path.exists(result)
+
+    def test_auto_output_path_returns_a_path(self, tmp_path):
+        # Arrange
         from scitex_capture.gif import GifCreator
 
-        try:
-            from PIL import Image
-        except ImportError:
-            pytest.skip("PIL not available")
+        _make_jpg(tmp_path / "test_image.jpg", size=(50, 50), color="yellow")
+        pattern = str(tmp_path / "test_*.jpg")
+        # Act
+        result = GifCreator().create_gif_from_pattern(pattern=pattern)
+        # Assert
+        assert result is not None
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # Create many files
-            for i in range(10):
-                img_path = os.path.join(tmpdir, f"img_{i:02d}.jpg")
-                Image.new("RGB", (50, 50), "orange").save(img_path)
+    def test_auto_output_path_uses_gif_summary_prefix(self, tmp_path):
+        # Arrange
+        from scitex_capture.gif import GifCreator
 
-            pattern = os.path.join(tmpdir, "img_*.jpg")
-            output_path = os.path.join(tmpdir, "limited.gif")
-            creator = GifCreator()
-            result = creator.create_gif_from_pattern(
-                pattern=pattern, output_path=output_path, max_frames=3
-            )
+        _make_jpg(tmp_path / "test_image.jpg", size=(50, 50), color="yellow")
+        pattern = str(tmp_path / "test_*.jpg")
+        # Act
+        result = GifCreator().create_gif_from_pattern(pattern=pattern)
+        # Assert
+        assert "gif_summary_" in result
 
-            assert result is not None
+    def test_max_frames_limit_still_returns_a_path(self, tmp_path):
+        # Arrange
+        from scitex_capture.gif import GifCreator
+
+        for i in range(10):
+            _make_jpg(tmp_path / f"img_{i:02d}.jpg", size=(50, 50), color="orange")
+        pattern = str(tmp_path / "img_*.jpg")
+        out = str(tmp_path / "limited.gif")
+        # Act
+        result = GifCreator().create_gif_from_pattern(
+            pattern=pattern, output_path=out, max_frames=3
+        )
+        # Assert
+        assert result is not None
 
 
 class TestGetRecentSessions:
-    """Test get_recent_sessions functionality."""
+    """Behavioural tests for get_recent_sessions."""
 
-    def test_get_recent_sessions_empty_dir(self):
-        """Test getting sessions from empty directory."""
-        # Arrange
-        # Act
-        # Assert
-        from scitex_capture.gif import GifCreator
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            creator = GifCreator()
-            result = creator.get_recent_sessions(screenshot_dir=tmpdir)
-
-            assert result == []
-
-    def test_get_recent_sessions_nonexistent_dir(self):
-        """Test getting sessions from nonexistent directory."""
+    def test_empty_dir_returns_empty_list(self, tmp_path):
         # Arrange
         from scitex_capture.gif import GifCreator
 
-        creator = GifCreator()
         # Act
-        result = creator.get_recent_sessions(screenshot_dir="/nonexistent/path")
-
+        result = GifCreator().get_recent_sessions(screenshot_dir=str(tmp_path))
         # Assert
         assert result == []
 
-    def test_get_recent_sessions_with_files(self):
-        """Test getting sessions with session files present."""
+    def test_nonexistent_dir_returns_empty_list(self):
         # Arrange
-        # Act
-        # Assert
         from scitex_capture.gif import GifCreator
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # Create session files with proper naming
-            session1 = "20250101_100000"
-            session2 = "20250102_110000"
-
-            Path(os.path.join(tmpdir, f"{session1}_0001_100000000.jpg")).touch()
-            Path(os.path.join(tmpdir, f"{session1}_0002_100001000.jpg")).touch()
-            Path(os.path.join(tmpdir, f"{session2}_0001_110000000.jpg")).touch()
-
-            creator = GifCreator()
-            result = creator.get_recent_sessions(screenshot_dir=tmpdir)
-
-            assert len(result) == 2
-            assert session2 in result  # Newer session
-            assert session1 in result
-
-    def test_get_recent_sessions_sorted_newest_first(self):
-        """Test sessions are sorted newest first."""
-        # Arrange
         # Act
+        result = GifCreator().get_recent_sessions(screenshot_dir="/nonexistent/path")
         # Assert
+        assert result == []
+
+    def test_two_sessions_are_both_detected(self, tmp_path):
+        # Arrange
         from scitex_capture.gif import GifCreator
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            sessions = ["20250101_100000", "20250103_100000", "20250102_100000"]
+        s1, s2 = "20250101_100000", "20250102_110000"
+        Path(tmp_path / f"{s1}_0001_100000000.jpg").touch()
+        Path(tmp_path / f"{s1}_0002_100001000.jpg").touch()
+        Path(tmp_path / f"{s2}_0001_110000000.jpg").touch()
+        # Act
+        result = GifCreator().get_recent_sessions(screenshot_dir=str(tmp_path))
+        # Assert
+        assert set(result) == {s1, s2}
 
-            for sess in sessions:
-                Path(os.path.join(tmpdir, f"{sess}_0001_100000000.jpg")).touch()
+    def test_sessions_sorted_newest_first(self, tmp_path):
+        # Arrange
+        from scitex_capture.gif import GifCreator
 
-            creator = GifCreator()
-            result = creator.get_recent_sessions(screenshot_dir=tmpdir)
-
-            assert result[0] == "20250103_100000"  # Newest
-            assert result[-1] == "20250101_100000"  # Oldest
+        sessions = ["20250101_100000", "20250103_100000", "20250102_100000"]
+        for sess in sessions:
+            Path(tmp_path / f"{sess}_0001_100000000.jpg").touch()
+        # Act
+        result = GifCreator().get_recent_sessions(screenshot_dir=str(tmp_path))
+        # Assert
+        assert result == sorted(sessions, reverse=True)
 
 
 class TestCreateGifFromRecentSession:
-    """Test create_gif_from_recent_session functionality."""
+    """Behavioural tests for create_gif_from_recent_session."""
 
-    def test_create_gif_from_recent_session_no_sessions(self):
-        """Test GIF creation when no sessions exist."""
+    def test_no_sessions_returns_none(self, tmp_path):
         # Arrange
-        # Act
-        # Assert
         from scitex_capture.gif import GifCreator
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            creator = GifCreator()
-            result = creator.create_gif_from_recent_session(screenshot_dir=tmpdir)
-
-            assert result is None
-
-    def test_create_gif_from_recent_session_with_session(self):
-        """Test GIF creation from most recent session."""
-        # Arrange
         # Act
+        result = GifCreator().create_gif_from_recent_session(
+            screenshot_dir=str(tmp_path)
+        )
         # Assert
+        assert result is None
+
+    def test_with_session_returns_a_path(self, tmp_path):
+        # Arrange
         from scitex_capture.gif import GifCreator
 
-        try:
-            from PIL import Image
-        except ImportError:
-            pytest.skip("PIL not available")
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            session_id = "20250104_150000"
-
-            # Create session files
-            for i in range(3):
-                img_path = os.path.join(tmpdir, f"{session_id}_{i:04d}_150000000.jpg")
-                Image.new("RGB", (100, 100), "cyan").save(img_path)
-
-            creator = GifCreator()
-            result = creator.create_gif_from_recent_session(screenshot_dir=tmpdir)
-
-            assert result is not None
+        session_id = "20250104_150000"
+        for i in range(3):
+            _make_jpg(tmp_path / f"{session_id}_{i:04d}_150000000.jpg", color="cyan")
+        # Act
+        result = GifCreator().create_gif_from_recent_session(
+            screenshot_dir=str(tmp_path)
+        )
+        # Assert
+        assert result is not None
 
 
 class TestConvenienceFunctions:
-    """Test module-level convenience functions."""
+    """Module-level convenience wrappers return None on no input."""
 
-    def test_create_gif_from_session_function(self):
-        """Test create_gif_from_session convenience function."""
+    def test_create_gif_from_session_function_returns_none(self, tmp_path):
         # Arrange
-        # Act
-        # Assert
         from scitex_capture.gif import create_gif_from_session
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            result = create_gif_from_session(
-                session_id="nonexistent", screenshot_dir=tmpdir
-            )
-            assert result is None
-
-    def test_create_gif_from_files_function(self):
-        """Test create_gif_from_files convenience function."""
-        # Arrange
         # Act
+        result = create_gif_from_session(
+            session_id="nonexistent", screenshot_dir=str(tmp_path)
+        )
         # Assert
+        assert result is None
+
+    def test_create_gif_from_files_function_returns_none(self, tmp_path):
+        # Arrange
         from scitex_capture.gif import create_gif_from_files
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            output_path = os.path.join(tmpdir, "output.gif")
-            result = create_gif_from_files(image_paths=[], output_path=output_path)
-            assert result is None
-
-    def test_create_gif_from_pattern_function(self):
-        """Test create_gif_from_pattern convenience function."""
-        # Arrange
+        out = str(tmp_path / "output.gif")
         # Act
+        result = create_gif_from_files(image_paths=[], output_path=out)
         # Assert
+        assert result is None
+
+    def test_create_gif_from_pattern_function_returns_none(self, tmp_path):
+        # Arrange
         from scitex_capture.gif import create_gif_from_pattern
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            pattern = os.path.join(tmpdir, "*.jpg")
-            result = create_gif_from_pattern(pattern=pattern)
-            assert result is None
-
-    def test_create_gif_from_latest_session_function(self):
-        """Test create_gif_from_latest_session convenience function."""
-        # Arrange
+        pattern = str(tmp_path / "*.jpg")
         # Act
+        result = create_gif_from_pattern(pattern=pattern)
         # Assert
+        assert result is None
+
+    def test_create_gif_from_latest_session_function_returns_none(self, tmp_path):
+        # Arrange
         from scitex_capture.gif import create_gif_from_latest_session
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            result = create_gif_from_latest_session(screenshot_dir=tmpdir)
-            assert result is None
+        # Act
+        result = create_gif_from_latest_session(screenshot_dir=str(tmp_path))
+        # Assert
+        assert result is None
 
 
 class TestModuleExports:
-    """Test module exports."""
+    """Test module exports are importable and callable."""
 
-    def test_gifcreator_importable_gifcreator_is_not_none(self):
-        """Test GifCreator class can be imported."""
+    def test_gifcreator_is_importable(self):
         # Arrange
         # Act
         from scitex_capture.gif import GifCreator
@@ -558,458 +440,90 @@ class TestModuleExports:
         # Assert
         assert GifCreator is not None
 
-    def test_all_functions_importable_callable_create_gif_from_session(self):
-        # Arrange
+    def test_create_gif_from_session_is_callable(self):
         # Arrange
         # Act
-        from scitex_capture.gif import (
-            create_gif_from_files,
-            create_gif_from_latest_session,
-            create_gif_from_pattern,
-            create_gif_from_session,
-        )
-        # Act
-        # Assert
+        from scitex_capture.gif import create_gif_from_session
+
         # Assert
         assert callable(create_gif_from_session)
 
-    def test_all_functions_importable_callable_create_gif_from_files(self):
-        # Arrange
+    def test_create_gif_from_files_is_callable(self):
         # Arrange
         # Act
-        from scitex_capture.gif import (
-            create_gif_from_files,
-            create_gif_from_latest_session,
-            create_gif_from_pattern,
-            create_gif_from_session,
-        )
-        # Act
-        # Assert
+        from scitex_capture.gif import create_gif_from_files
+
         # Assert
         assert callable(create_gif_from_files)
 
-    def test_all_functions_importable_callable_create_gif_from_pattern(self):
-        # Arrange
+    def test_create_gif_from_pattern_is_callable(self):
         # Arrange
         # Act
-        from scitex_capture.gif import (
-            create_gif_from_files,
-            create_gif_from_latest_session,
-            create_gif_from_pattern,
-            create_gif_from_session,
-        )
-        # Act
-        # Assert
+        from scitex_capture.gif import create_gif_from_pattern
+
         # Assert
         assert callable(create_gif_from_pattern)
 
-    def test_all_functions_importable_callable_create_gif_from_latest_session(self):
-        # Arrange
+    def test_create_gif_from_latest_session_is_callable(self):
         # Arrange
         # Act
-        from scitex_capture.gif import (
-            create_gif_from_files,
-            create_gif_from_latest_session,
-            create_gif_from_pattern,
-            create_gif_from_session,
-        )
-        # Act
-        # Assert
+        from scitex_capture.gif import create_gif_from_latest_session
+
         # Assert
         assert callable(create_gif_from_latest_session)
 
-
-    def test_functions_from_package_init(self):
-        """Test GIF functions accessible from package init."""
+    def test_create_gif_from_session_accessible_from_package_root(self):
         # Arrange
         # Act
-        from scitex_capture import (
-            create_gif_from_files,
-            create_gif_from_latest_session,
-            create_gif_from_pattern,
-            create_gif_from_session,
-        )
+        from scitex_capture import create_gif_from_session
 
         # Assert
         assert callable(create_gif_from_session)
 
 
 class TestPILNotAvailable:
-    """Test behavior when PIL is not available."""
+    """The 'PIL not installed' branch must return None.
 
-    def test_create_gif_without_pil(self):
-        """Test GIF creation handles missing PIL gracefully."""
+    Exercised by a real subprocess whose PYTHONPATH front-loads a stub
+    ``PIL`` package that raises ImportError on import — the real
+    ``except ImportError`` branch in gif.create_gif_from_files runs.
+    """
+
+    def test_missing_pil_makes_create_gif_from_files_return_none(self, tmp_path):
         # Arrange
+        stub_root = tmp_path / "stub"
+        (stub_root / "PIL").mkdir(parents=True)
+        (stub_root / "PIL" / "__init__.py").write_text(
+            'raise ImportError("PIL blocked for test")\n'
+        )
+        runner = tmp_path / "run.py"
+        runner.write_text(
+            textwrap.dedent(
+                """
+                import os, tempfile
+                from scitex_capture.gif import create_gif_from_files
+                with tempfile.TemporaryDirectory() as d:
+                    out = os.path.join(d, "out.gif")
+                    r = create_gif_from_files(
+                        image_paths=["/some/path.jpg"], output_path=out
+                    )
+                    print("RESULT_IS_NONE", r is None)
+                """
+            )
+        )
+        env = dict(os.environ)
+        env["PYTHONPATH"] = os.pathsep.join([str(stub_root), env.get("PYTHONPATH", "")])
         # Act
+        proc = subprocess.run(
+            [sys.executable, str(runner)],
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=30,
+        )
         # Assert
-        from scitex_capture.gif import GifCreator
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            output_path = os.path.join(tmpdir, "output.gif")
-
-            # Mock PIL import to fail
-            with patch.dict(sys.modules, {"PIL": None, "PIL.Image": None}):
-                creator = GifCreator()
-                # Pass valid paths but PIL import should fail
-                result = creator.create_gif_from_files(
-                    image_paths=["/some/path.jpg"], output_path=output_path
-                )
-
-                # Should return None when PIL is not available
-                assert result is None
+        assert "RESULT_IS_NONE True" in proc.stdout
 
 
 if __name__ == "__main__":
-    import os
-
-    import pytest
-
     pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/capture/gif.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-18 09:55:56 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/capture/gif.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-#
-# __FILE__ = "./src/scitex/capture/gif.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-#
-# """
-# GIF creation functionality for CAM.
-# Create animated GIFs from screenshot sequences for visual summaries.
-# """
-#
-# import glob
-# import re
-# from datetime import datetime
-# from pathlib import Path
-# from typing import List, Optional
-#
-#
-# class GifCreator:
-#     """
-#     Creates animated GIFs from screenshot sequences.
-#     Useful for creating visual summaries of monitoring sessions or workflows.
-#     """
-#
-#     def __init__(self):
-#         """Initialize GIF creator."""
-#         pass
-#
-#     def create_gif_from_session(
-#         self,
-#         session_id: str,
-#         output_path: Optional[str] = None,
-#         screenshot_dir: str = "~/.scitex/capture",
-#         duration: float = 0.5,
-#         optimize: bool = True,
-#         max_frames: Optional[int] = None,
-#     ) -> Optional[str]:
-#         """
-#         Create a GIF from a monitoring session's screenshots.
-#
-#         Args:
-#             session_id: Session ID from monitoring (e.g., "20250823_104523")
-#             output_path: Output GIF path (auto-generated if None)
-#             screenshot_dir: Directory containing screenshots
-#             duration: Duration per frame in seconds (default: 0.5)
-#             optimize: Optimize GIF for smaller file size (default: True)
-#             max_frames: Maximum number of frames to include (None = all)
-#
-#         Returns:
-#             Path to created GIF file, or None if failed
-#         """
-#         try:
-#             screenshot_dir = Path(screenshot_dir).expanduser()
-#
-#             # Find all screenshots for this session
-#             pattern = f"{session_id}_*.jpg"
-#             jpg_files = list(screenshot_dir.glob(pattern))
-#
-#             # Also try PNG if no JPG files found
-#             if not jpg_files:
-#                 pattern = f"{session_id}_*.png"
-#                 jpg_files = list(screenshot_dir.glob(pattern))
-#
-#             if not jpg_files:
-#                 print(f"No screenshots found for session {session_id}")
-#                 return None
-#
-#             # Sort by filename (which includes timestamp)
-#             jpg_files.sort()
-#
-#             # Limit frames if specified
-#             if max_frames and len(jpg_files) > max_frames:
-#                 # Take evenly spaced frames
-#                 step = len(jpg_files) // max_frames
-#                 jpg_files = jpg_files[::step][:max_frames]
-#
-#             if output_path is None:
-#                 output_path = screenshot_dir / f"{session_id}_summary.gif"
-#             else:
-#                 output_path = Path(output_path)
-#
-#             return self.create_gif_from_files(
-#                 image_paths=[str(f) for f in jpg_files],
-#                 output_path=str(output_path),
-#                 duration=duration,
-#                 optimize=optimize,
-#             )
-#
-#         except Exception as e:
-#             print(f"Error creating GIF from session: {e}")
-#             return None
-#
-#     def create_gif_from_files(
-#         self,
-#         image_paths: List[str],
-#         output_path: str,
-#         duration: float = 0.5,
-#         optimize: bool = True,
-#         loop: int = 0,
-#     ) -> Optional[str]:
-#         """
-#         Create a GIF from a list of image files.
-#
-#         Args:
-#             image_paths: List of image file paths
-#             output_path: Output GIF path
-#             duration: Duration per frame in seconds (default: 0.5)
-#             optimize: Optimize GIF for smaller file size (default: True)
-#             loop: Number of loops (0 = infinite, default: 0)
-#
-#         Returns:
-#             Path to created GIF file, or None if failed
-#         """
-#         try:
-#             from PIL import Image
-#
-#             if not image_paths:
-#                 print("No image paths provided")
-#                 return None
-#
-#             # Load all images
-#             images = []
-#             for path in image_paths:
-#                 if not os.path.exists(path):
-#                     print(f"Image not found: {path}")
-#                     continue
-#
-#                 try:
-#                     img = Image.open(path)
-#                     # Convert to RGB if necessary (for consistency)
-#                     if img.mode != "RGB":
-#                         img = img.convert("RGB")
-#                     images.append(img)
-#                 except Exception as e:
-#                     print(f"Error loading image {path}: {e}")
-#                     continue
-#
-#             if not images:
-#                 print("No valid images found")
-#                 return None
-#
-#             # Ensure all images have the same size (resize to first image size)
-#             target_size = images[0].size
-#             for i in range(1, len(images)):
-#                 if images[i].size != target_size:
-#                     images[i] = images[i].resize(target_size, Image.Resampling.LANCZOS)
-#
-#             # Create output directory if it doesn't exist
-#             output_path = Path(output_path)
-#             output_path.parent.mkdir(parents=True, exist_ok=True)
-#
-#             # Save as GIF
-#             duration_ms = int(duration * 1000)  # Convert to milliseconds
-#
-#             images[0].save(
-#                 str(output_path),
-#                 format="GIF",
-#                 save_all=True,
-#                 append_images=images[1:],
-#                 duration=duration_ms,
-#                 loop=loop,
-#                 optimize=optimize,
-#             )
-#
-#             if output_path.exists():
-#                 file_size = output_path.stat().st_size / 1024  # KB
-#                 print(
-#                     f"📹 GIF created: {output_path} ({len(images)} frames, {file_size:.1f}KB)"
-#                 )
-#                 return str(output_path)
-#             else:
-#                 return None
-#
-#         except ImportError:
-#             print(
-#                 "PIL (Pillow) is required for GIF creation. Install with: pip install Pillow"
-#             )
-#             return None
-#         except Exception as e:
-#             print(f"Error creating GIF: {e}")
-#             return None
-#
-#     def create_gif_from_pattern(
-#         self,
-#         pattern: str,
-#         output_path: Optional[str] = None,
-#         duration: float = 0.5,
-#         optimize: bool = True,
-#         max_frames: Optional[int] = None,
-#     ) -> Optional[str]:
-#         """
-#         Create a GIF from files matching a glob pattern.
-#
-#         Args:
-#             pattern: Glob pattern for image files (e.g., "/path/screenshots/*.jpg")
-#             output_path: Output GIF path (auto-generated if None)
-#             duration: Duration per frame in seconds (default: 0.5)
-#             optimize: Optimize GIF for smaller file size (default: True)
-#             max_frames: Maximum number of frames to include (None = all)
-#
-#         Returns:
-#             Path to created GIF file, or None if failed
-#         """
-#         try:
-#             # Find matching files
-#             files = glob.glob(pattern)
-#             files.sort()  # Sort alphabetically
-#
-#             if not files:
-#                 print(f"No files found matching pattern: {pattern}")
-#                 return None
-#
-#             # Limit frames if specified
-#             if max_frames and len(files) > max_frames:
-#                 step = len(files) // max_frames
-#                 files = files[::step][:max_frames]
-#
-#             if output_path is None:
-#                 # Generate output path based on pattern
-#                 pattern_dir = Path(pattern).parent
-#                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-#                 output_path = pattern_dir / f"gif_summary_{timestamp}.gif"
-#
-#             return self.create_gif_from_files(
-#                 image_paths=files,
-#                 output_path=str(output_path),
-#                 duration=duration,
-#                 optimize=optimize,
-#             )
-#
-#         except Exception as e:
-#             print(f"Error creating GIF from pattern: {e}")
-#             return None
-#
-#     def get_recent_sessions(
-#         self, screenshot_dir: str = "~/.scitex/capture"
-#     ) -> List[str]:
-#         """
-#         Get list of recent monitoring session IDs.
-#
-#         Args:
-#             screenshot_dir: Directory containing screenshots
-#
-#         Returns:
-#             List of session IDs sorted by recency (newest first)
-#         """
-#         try:
-#             screenshot_dir = Path(screenshot_dir).expanduser()
-#
-#             if not screenshot_dir.exists():
-#                 return []
-#
-#             # Find all monitoring session files (format: SESSIONID_NNNN_timestamp.ext)
-#             session_pattern = re.compile(r"^(\d{8}_\d{6})_\d{4}_.*\.(jpg|png)$")
-#
-#             sessions = set()
-#             for file in screenshot_dir.iterdir():
-#                 if file.is_file():
-#                     match = session_pattern.match(file.name)
-#                     if match:
-#                         sessions.add(match.group(1))
-#
-#             # Sort by session ID (which includes timestamp)
-#             return sorted(sessions, reverse=True)
-#
-#         except Exception as e:
-#             print(f"Error getting recent sessions: {e}")
-#             return []
-#
-#     def create_gif_from_recent_session(
-#         self,
-#         screenshot_dir: str = "~/.scitex/capture",
-#         duration: float = 0.5,
-#         optimize: bool = True,
-#         max_frames: Optional[int] = None,
-#     ) -> Optional[str]:
-#         """
-#         Create a GIF from the most recent monitoring session.
-#
-#         Args:
-#             screenshot_dir: Directory containing screenshots
-#             duration: Duration per frame in seconds (default: 0.5)
-#             optimize: Optimize GIF for smaller file size (default: True)
-#             max_frames: Maximum number of frames to include (None = all)
-#
-#         Returns:
-#             Path to created GIF file, or None if failed
-#         """
-#         sessions = self.get_recent_sessions(screenshot_dir)
-#
-#         if not sessions:
-#             print("No monitoring sessions found")
-#             return None
-#
-#         latest_session = sessions[0]
-#         print(f"Creating GIF from latest session: {latest_session}")
-#
-#         return self.create_gif_from_session(
-#             session_id=latest_session,
-#             screenshot_dir=screenshot_dir,
-#             duration=duration,
-#             optimize=optimize,
-#             max_frames=max_frames,
-#         )
-#
-#
-# # Convenience functions for easy usage
-# def create_gif_from_session(session_id: str, **kwargs) -> Optional[str]:
-#     """Create GIF from monitoring session screenshots."""
-#     creator = GifCreator()
-#     return creator.create_gif_from_session(session_id, **kwargs)
-#
-#
-# def create_gif_from_files(
-#     image_paths: List[str], output_path: str, **kwargs
-# ) -> Optional[str]:
-#     """Create GIF from list of image files."""
-#     creator = GifCreator()
-#     return creator.create_gif_from_files(image_paths, output_path, **kwargs)
-#
-#
-# def create_gif_from_pattern(pattern: str, **kwargs) -> Optional[str]:
-#     """Create GIF from files matching glob pattern."""
-#     creator = GifCreator()
-#     return creator.create_gif_from_pattern(pattern, **kwargs)
-#
-#
-# def create_gif_from_latest_session(**kwargs) -> Optional[str]:
-#     """Create GIF from the most recent monitoring session."""
-#     creator = GifCreator()
-#     return creator.create_gif_from_recent_session(**kwargs)
-#
-#
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/capture/gif.py
-# --------------------------------------------------------------------------------

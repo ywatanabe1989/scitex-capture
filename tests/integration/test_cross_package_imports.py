@@ -21,9 +21,12 @@ CROSS_PACKAGE_IMPORTS = [
 
 
 @pytest.mark.parametrize("module_name", CROSS_PACKAGE_IMPORTS)
-def test_cross_package_import(module_name):
+def test_cross_package_import_resolves_to_named_module(module_name):
     """Importing scitex-capture's declared cross-package dependency must succeed."""
     # Arrange
+    import importlib
+
     # Act
+    module = importlib.import_module(module_name)
     # Assert
-    pytest.importorskip(module_name)
+    assert module.__name__ == module_name
