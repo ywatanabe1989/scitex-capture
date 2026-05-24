@@ -5,523 +5,443 @@ Tests Session context manager for automatic capture start/stop:
 - Session initialization with parameters
 - Context manager protocol (__enter__/__exit__)
 - session() factory function
+
+The context-manager tests run the *real* Session lifecycle: __enter__
+spawns a real ScreenshotWorker daemon thread and __exit__ joins it.
+The worker's screenshot attempts land in a TemporaryDirectory (or
+fail harmlessly when headless); the lifecycle assertions (running
+flags, parameter propagation, __exit__ return) are independent of
+whether any screenshot actually succeeds, so no collaborator needs to
+be faked.
 """
 
 import os
 import tempfile
-from unittest.mock import MagicMock, patch
 
 import pytest
 
 
 class TestSessionInit:
-    """Test Session class initialization."""
+    """Test Session default-parameter initialization."""
 
-    def test_default_initialization_sess_output_dir_is_none(self):
-        # Arrange
+    def test_default_output_dir_is_none(self):
         # Arrange
         from scitex_capture.session import Session
+
         # Act
         sess = Session()
-        # Act
         # Assert
-        # Assert
-        # Default output_dir is None so start_monitor lazily resolves
-        # the canonical $SCITEX_DIR/capture/runtime/screenshots/ path
-        # at use time (honours $SCITEX_DIR relocation).
+        # None means start_monitor lazily resolves the canonical
+        # $SCITEX_DIR/capture/runtime/screenshots/ path at use time.
         assert sess.output_dir is None
 
-    def test_default_initialization_sess_interval_equals_n_1_0(self):
-        # Arrange
+    def test_default_interval_is_one_second(self):
         # Arrange
         from scitex_capture.session import Session
+
         # Act
         sess = Session()
-        # Act
-        # Assert
         # Assert
         assert sess.interval == 1.0
 
-    def test_default_initialization_sess_jpeg_is_true(self):
-        # Arrange
+    def test_default_jpeg_is_true(self):
         # Arrange
         from scitex_capture.session import Session
+
         # Act
         sess = Session()
-        # Act
-        # Assert
         # Assert
         assert sess.jpeg is True
 
-    def test_default_initialization_sess_quality_equals_n_60(self):
-        # Arrange
+    def test_default_quality_is_sixty(self):
         # Arrange
         from scitex_capture.session import Session
+
         # Act
         sess = Session()
-        # Act
-        # Assert
         # Assert
         assert sess.quality == 60
 
-    def test_default_initialization_sess_on_capture_is_none(self):
-        # Arrange
+    def test_default_on_capture_is_none(self):
         # Arrange
         from scitex_capture.session import Session
+
         # Act
         sess = Session()
-        # Act
-        # Assert
         # Assert
         assert sess.on_capture is None
 
-    def test_default_initialization_sess_on_error_is_none(self):
-        # Arrange
+    def test_default_on_error_is_none(self):
         # Arrange
         from scitex_capture.session import Session
+
         # Act
         sess = Session()
-        # Act
-        # Assert
         # Assert
         assert sess.on_error is None
 
-    def test_default_initialization_sess_verbose_is_true(self):
-        # Arrange
+    def test_default_verbose_is_true(self):
         # Arrange
         from scitex_capture.session import Session
+
         # Act
         sess = Session()
-        # Act
-        # Assert
         # Assert
         assert sess.verbose is True
 
-    def test_default_initialization_sess_monitor_id_equals_n_0(self):
-        # Arrange
+    def test_default_monitor_id_is_zero(self):
         # Arrange
         from scitex_capture.session import Session
+
         # Act
         sess = Session()
-        # Act
-        # Assert
         # Assert
         assert sess.monitor_id == 0
 
-    def test_default_initialization_sess_capture_all_is_false(self):
-        # Arrange
+    def test_default_capture_all_is_false(self):
         # Arrange
         from scitex_capture.session import Session
+
         # Act
         sess = Session()
-        # Act
-        # Assert
         # Assert
         assert sess.capture_all is False
 
-    def test_default_initialization_sess_worker_is_none(self):
-        # Arrange
+    def test_default_worker_is_none(self):
         # Arrange
         from scitex_capture.session import Session
+
         # Act
         sess = Session()
-        # Act
-        # Assert
         # Assert
         assert sess.worker is None
 
 
-    def test_custom_initialization_sess_output_dir_equals_custom_path(self):
-        # Arrange
-        # Arrange
-        from scitex_capture.session import Session
-        on_capture = lambda x: None
-        on_error = lambda x: None
-        # Act
-        sess = Session(
-            output_dir="/custom/path",
-            interval=2.5,
-            jpeg=False,
-            quality=90,
-            on_capture=on_capture,
-            on_error=on_error,
-            verbose=False,
-            monitor_id=1,
-            capture_all=True,
-        )
-        # Act
-        # Assert
-        # Assert
-        assert sess.output_dir == "/custom/path"
+@pytest.fixture
+def callbacks():
+    """A pair of distinct no-op callbacks for identity assertions."""
+    return (lambda x: None, lambda x: None)
 
-    def test_custom_initialization_sess_interval_equals_n_2_5(self):
-        # Arrange
-        # Arrange
-        from scitex_capture.session import Session
-        on_capture = lambda x: None
-        on_error = lambda x: None
-        # Act
-        sess = Session(
-            output_dir="/custom/path",
-            interval=2.5,
-            jpeg=False,
-            quality=90,
-            on_capture=on_capture,
-            on_error=on_error,
-            verbose=False,
-            monitor_id=1,
-            capture_all=True,
-        )
-        # Act
-        # Assert
-        # Assert
-        assert sess.interval == 2.5
 
-    def test_custom_initialization_sess_jpeg_is_false(self):
-        # Arrange
-        # Arrange
-        from scitex_capture.session import Session
-        on_capture = lambda x: None
-        on_error = lambda x: None
-        # Act
-        sess = Session(
-            output_dir="/custom/path",
-            interval=2.5,
-            jpeg=False,
-            quality=90,
-            on_capture=on_capture,
-            on_error=on_error,
-            verbose=False,
-            monitor_id=1,
-            capture_all=True,
-        )
-        # Act
-        # Assert
-        # Assert
-        assert sess.jpeg is False
+@pytest.fixture
+def custom_session(callbacks):
+    """A Session built with every parameter set to a non-default value.
 
-    def test_custom_initialization_sess_quality_equals_n_90(self):
-        # Arrange
-        # Arrange
-        from scitex_capture.session import Session
-        on_capture = lambda x: None
-        on_error = lambda x: None
-        # Act
-        sess = Session(
-            output_dir="/custom/path",
-            interval=2.5,
-            jpeg=False,
-            quality=90,
-            on_capture=on_capture,
-            on_error=on_error,
-            verbose=False,
-            monitor_id=1,
-            capture_all=True,
-        )
-        # Act
-        # Assert
-        # Assert
-        assert sess.quality == 90
+    Built via the ``session()`` factory (not ``Session(...)`` directly):
+    the object is a context manager that acquires nothing until
+    ``__enter__`` — it is never entered here, so there is no resource to
+    clean up.
+    """
+    from scitex_capture.session import session as make_session
 
-    def test_custom_initialization_sess_on_capture_is_on_capture(self):
-        # Arrange
-        # Arrange
-        from scitex_capture.session import Session
-        on_capture = lambda x: None
-        on_error = lambda x: None
-        # Act
-        sess = Session(
-            output_dir="/custom/path",
-            interval=2.5,
-            jpeg=False,
-            quality=90,
-            on_capture=on_capture,
-            on_error=on_error,
-            verbose=False,
-            monitor_id=1,
-            capture_all=True,
-        )
-        # Act
-        # Assert
-        # Assert
-        assert sess.on_capture is on_capture
+    on_capture, on_error = callbacks
+    return make_session(
+        output_dir="/custom/path",
+        interval=2.5,
+        jpeg=False,
+        quality=90,
+        on_capture=on_capture,
+        on_error=on_error,
+        verbose=False,
+        monitor_id=1,
+        capture_all=True,
+    )
 
-    def test_custom_initialization_sess_on_error_is_on_error(self):
-        # Arrange
-        # Arrange
-        from scitex_capture.session import Session
-        on_capture = lambda x: None
-        on_error = lambda x: None
-        # Act
-        sess = Session(
-            output_dir="/custom/path",
-            interval=2.5,
-            jpeg=False,
-            quality=90,
-            on_capture=on_capture,
-            on_error=on_error,
-            verbose=False,
-            monitor_id=1,
-            capture_all=True,
-        )
-        # Act
-        # Assert
-        # Assert
-        assert sess.on_error is on_error
 
-    def test_custom_initialization_sess_verbose_is_false(self):
-        # Arrange
-        # Arrange
-        from scitex_capture.session import Session
-        on_capture = lambda x: None
-        on_error = lambda x: None
-        # Act
-        sess = Session(
-            output_dir="/custom/path",
-            interval=2.5,
-            jpeg=False,
-            quality=90,
-            on_capture=on_capture,
-            on_error=on_error,
-            verbose=False,
-            monitor_id=1,
-            capture_all=True,
-        )
-        # Act
-        # Assert
-        # Assert
-        assert sess.verbose is False
+class TestSessionCustomInit:
+    """Test Session stores every custom-init parameter verbatim."""
 
-    def test_custom_initialization_sess_monitor_id_equals_n_1(self):
+    def test_custom_output_dir_stored(self, custom_session):
         # Arrange
-        # Arrange
-        from scitex_capture.session import Session
-        on_capture = lambda x: None
-        on_error = lambda x: None
+        sess = custom_session
         # Act
-        sess = Session(
-            output_dir="/custom/path",
-            interval=2.5,
-            jpeg=False,
-            quality=90,
-            on_capture=on_capture,
-            on_error=on_error,
-            verbose=False,
-            monitor_id=1,
-            capture_all=True,
-        )
-        # Act
+        value = sess.output_dir
         # Assert
-        # Assert
-        assert sess.monitor_id == 1
+        assert value == "/custom/path"
 
-    def test_custom_initialization_sess_capture_all_is_true(self):
+    def test_custom_interval_stored(self, custom_session):
         # Arrange
-        # Arrange
-        from scitex_capture.session import Session
-        on_capture = lambda x: None
-        on_error = lambda x: None
+        sess = custom_session
         # Act
-        sess = Session(
-            output_dir="/custom/path",
-            interval=2.5,
-            jpeg=False,
-            quality=90,
-            on_capture=on_capture,
-            on_error=on_error,
-            verbose=False,
-            monitor_id=1,
-            capture_all=True,
-        )
-        # Act
+        value = sess.interval
         # Assert
-        # Assert
-        assert sess.capture_all is True
+        assert value == 2.5
 
+    def test_custom_jpeg_stored(self, custom_session):
+        # Arrange
+        sess = custom_session
+        # Act
+        value = sess.jpeg
+        # Assert
+        assert value is False
+
+    def test_custom_quality_stored(self, custom_session):
+        # Arrange
+        sess = custom_session
+        # Act
+        value = sess.quality
+        # Assert
+        assert value == 90
+
+    def test_custom_on_capture_stored(self, custom_session, callbacks):
+        # Arrange
+        sess = custom_session
+        expected, _ = callbacks
+        # Act
+        value = sess.on_capture
+        # Assert
+        assert value is expected
+
+    def test_custom_on_error_stored(self, custom_session, callbacks):
+        # Arrange
+        sess = custom_session
+        _, expected = callbacks
+        # Act
+        value = sess.on_error
+        # Assert
+        assert value is expected
+
+    def test_custom_verbose_stored(self, custom_session):
+        # Arrange
+        sess = custom_session
+        # Act
+        value = sess.verbose
+        # Assert
+        assert value is False
+
+    def test_custom_monitor_id_stored(self, custom_session):
+        # Arrange
+        sess = custom_session
+        # Act
+        value = sess.monitor_id
+        # Assert
+        assert value == 1
+
+    def test_custom_capture_all_stored(self, custom_session):
+        # Arrange
+        sess = custom_session
+        # Act
+        value = sess.capture_all
+        # Assert
+        assert value is True
 
 
 class TestSessionContextManager:
-    """Test Session context manager protocol."""
+    """Test the real Session context manager protocol."""
 
-    def test_enter_starts_monitoring(self):
-        """Test __enter__ starts capture monitoring."""
+    def test_enter_returns_the_session_object(self):
         # Arrange
-        # Act
-        # Assert
-        from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.session import Session
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch.object(ScreenshotWorker, "_take_screenshot", return_value=None):
-                sess = Session(output_dir=tmpdir, verbose=False)
-
-                result = sess.__enter__()
-
+            sess = Session(output_dir=tmpdir, verbose=False)
+            # Act
+            result = sess.__enter__()
+            try:
+                # Assert
                 assert result is sess
-                assert sess.worker is not None
-                assert sess.worker.running is True
-
+            finally:
                 sess.__exit__(None, None, None)
-                assert sess.worker.running is False
 
-    def test_exit_stops_monitoring(self):
-        """Test __exit__ stops capture monitoring."""
+    def test_enter_creates_a_worker(self):
         # Arrange
-        # Act
-        # Assert
-        from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.session import Session
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch.object(ScreenshotWorker, "_take_screenshot", return_value=None):
-                sess = Session(output_dir=tmpdir, verbose=False)
-                sess.__enter__()
+            sess = Session(output_dir=tmpdir, verbose=False)
+            # Act
+            sess.__enter__()
+            try:
+                # Assert
+                assert sess.worker is not None
+            finally:
+                sess.__exit__(None, None, None)
 
+    def test_enter_marks_worker_running(self):
+        # Arrange
+        from scitex_capture.session import Session
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            sess = Session(output_dir=tmpdir, verbose=False)
+            # Act
+            sess.__enter__()
+            try:
+                # Assert
+                assert sess.worker.running is True
+            finally:
+                sess.__exit__(None, None, None)
+
+    def test_exit_stops_the_worker(self):
+        # Arrange
+        from scitex_capture.session import Session
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            sess = Session(output_dir=tmpdir, verbose=False)
+            sess.__enter__()
+            worker = sess.worker
+            # Act
+            sess.__exit__(None, None, None)
+            # Assert
+            assert worker.running is False
+
+    def test_exit_returns_false_to_not_suppress_exceptions(self):
+        # Arrange
+        from scitex_capture.session import Session
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            sess = Session(output_dir=tmpdir, verbose=False)
+            sess.__enter__()
+            # Act
+            result = sess.__exit__(ValueError, ValueError("test"), None)
+            # Assert
+            assert result is False
+
+    def test_with_statement_starts_worker_inside_block(self):
+        # Arrange
+        from scitex_capture.session import Session
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Act
+            with Session(output_dir=tmpdir, verbose=False) as sess:
+                running_inside = sess.worker.running
+            # Assert
+            assert running_inside is True
+
+    def test_with_statement_stops_worker_after_block(self):
+        # Arrange
+        from scitex_capture.session import Session
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Act
+            with Session(output_dir=tmpdir, verbose=False) as sess:
                 worker = sess.worker
-                assert worker.running is True
+            # Assert
+            assert worker.running is False
 
-                result = sess.__exit__(None, None, None)
 
-                assert result is False  # Don't suppress exceptions
-                assert worker.running is False
+class TestSessionParameterPropagation:
+    """Each Session parameter must reach the underlying worker."""
 
-    def test_exit_returns_false(self):
-        """Test __exit__ returns False (doesn't suppress exceptions)."""
-        # Arrange
-        # Act
-        # Assert
-        from scitex_capture.capture import ScreenshotWorker
+    @pytest.fixture
+    def running_worker(self):
         from scitex_capture.session import Session
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch.object(ScreenshotWorker, "_take_screenshot", return_value=None):
-                sess = Session(output_dir=tmpdir, verbose=False)
-                sess.__enter__()
+            with Session(
+                output_dir=tmpdir,
+                interval=0.5,
+                jpeg=False,
+                quality=80,
+                verbose=False,
+                monitor_id=2,
+                capture_all=True,
+            ) as sess:
+                yield sess.worker
 
-                # Test with exception info
-                result = sess.__exit__(ValueError, ValueError("test"), None)
-                assert result is False
-
-    def test_context_manager_with_statement(self):
-        """Test Session works with 'with' statement."""
+    def test_interval_propagates_to_worker(self, running_worker):
         # Arrange
+        worker = running_worker
         # Act
+        value = worker.interval_sec
         # Assert
-        from scitex_capture.capture import ScreenshotWorker
-        from scitex_capture.session import Session
+        assert value == 0.5
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            with patch.object(ScreenshotWorker, "_take_screenshot", return_value=None):
-                worker_ref = None
-
-                with Session(output_dir=tmpdir, verbose=False) as sess:
-                    worker_ref = sess.worker
-                    assert sess.worker.running is True
-
-                # After exiting context, worker should be stopped
-                assert worker_ref.running is False
-
-    def test_context_manager_passes_parameters(self):
-        """Test Session passes parameters to start_monitor."""
+    def test_jpeg_flag_propagates_to_worker(self, running_worker):
         # Arrange
+        worker = running_worker
         # Act
+        value = worker.use_jpeg
         # Assert
-        from scitex_capture.capture import ScreenshotWorker
-        from scitex_capture.session import Session
+        assert value is False
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            with patch.object(ScreenshotWorker, "_take_screenshot", return_value=None):
-                with Session(
-                    output_dir=tmpdir,
-                    interval=0.5,
-                    jpeg=False,
-                    quality=80,
-                    verbose=False,
-                    monitor_id=2,
-                    capture_all=True,
-                ) as sess:
-                    worker = sess.worker
+    def test_quality_propagates_to_worker(self, running_worker):
+        # Arrange
+        worker = running_worker
+        # Act
+        value = worker.jpeg_quality
+        # Assert
+        assert value == 80
 
-                    assert worker.interval_sec == 0.5
-                    assert worker.use_jpeg is False
-                    assert worker.jpeg_quality == 80
-                    assert worker.verbose is False
-                    assert worker.monitor == 2
-                    assert worker.capture_all is True
+    def test_verbose_propagates_to_worker(self, running_worker):
+        # Arrange
+        worker = running_worker
+        # Act
+        value = worker.verbose
+        # Assert
+        assert value is False
+
+    def test_monitor_id_propagates_to_worker(self, running_worker):
+        # Arrange
+        worker = running_worker
+        # Act
+        value = worker.monitor
+        # Assert
+        assert value == 2
+
+    def test_capture_all_propagates_to_worker(self, running_worker):
+        # Arrange
+        worker = running_worker
+        # Act
+        value = worker.capture_all
+        # Assert
+        assert value is True
 
 
 class TestSessionCallbacks:
-    """Test Session callback functionality."""
+    """Test Session forwards callbacks to the worker."""
 
-    def test_on_capture_callback_passed(self):
-        """Test on_capture callback is passed to worker."""
+    def test_on_capture_callback_reaches_worker(self):
         # Arrange
-        # Act
-        # Assert
-        from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.session import Session
 
+        captures = []
+        callback = lambda p: captures.append(p)
         with tempfile.TemporaryDirectory() as tmpdir:
-            captures = []
-            callback = lambda p: captures.append(p)
+            # Act
+            with Session(output_dir=tmpdir, on_capture=callback, verbose=False) as sess:
+                forwarded = sess.worker.on_capture
+            # Assert
+            assert forwarded is callback
 
-            with patch.object(ScreenshotWorker, "_take_screenshot", return_value=None):
-                with Session(
-                    output_dir=tmpdir, on_capture=callback, verbose=False
-                ) as sess:
-                    assert sess.worker.on_capture is callback
-
-    def test_on_error_callback_passed(self):
-        """Test on_error callback is passed to worker."""
+    def test_on_error_callback_reaches_worker(self):
         # Arrange
-        # Act
-        # Assert
-        from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.session import Session
 
+        errors = []
+        callback = lambda e: errors.append(e)
         with tempfile.TemporaryDirectory() as tmpdir:
-            errors = []
-            callback = lambda e: errors.append(e)
-
-            with patch.object(ScreenshotWorker, "_take_screenshot", return_value=None):
-                with Session(
-                    output_dir=tmpdir, on_error=callback, verbose=False
-                ) as sess:
-                    assert sess.worker.on_error is callback
+            # Act
+            with Session(output_dir=tmpdir, on_error=callback, verbose=False) as sess:
+                forwarded = sess.worker.on_error
+            # Assert
+            assert forwarded is callback
 
 
 class TestSessionExceptionHandling:
-    """Test Session behavior with exceptions."""
+    """Test Session behavior when the body raises."""
 
     def test_exception_in_context_still_stops_worker(self):
-        """Test worker stops even when exception occurs in context."""
         # Arrange
-        # Act
-        # Assert
-        from scitex_capture.capture import ScreenshotWorker
         from scitex_capture.session import Session
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch.object(ScreenshotWorker, "_take_screenshot", return_value=None):
-                sess = Session(output_dir=tmpdir, verbose=False)
-                worker_ref = None
-
-                try:
-                    with sess:
-                        worker_ref = sess.worker
-                        raise ValueError("Test exception")
-                except ValueError:
-                    pass
-
-                # Worker should still be stopped
-                assert worker_ref.running is False
+            sess = Session(output_dir=tmpdir, verbose=False)
+            worker_ref = None
+            # Act
+            try:
+                with sess:
+                    worker_ref = sess.worker
+                    raise ValueError("Test exception")
+            except ValueError:
+                pass
+            # Assert
+            assert worker_ref.running is False
 
 
 class TestSessionFactoryFunction:
     """Test session() factory function."""
 
     def test_session_returns_session_instance(self):
-        """Test session() returns a Session instance."""
         # Arrange
         from scitex_capture.session import Session, session
 
@@ -530,54 +450,92 @@ class TestSessionFactoryFunction:
         # Assert
         assert isinstance(result, Session)
 
-    def test_session_passes_kwargs(self):
-        """Test session() passes kwargs to Session.__init__."""
+    def test_session_factory_works_as_context_manager(self):
         # Arrange
-        # Act
-        # Assert
         from scitex_capture.session import session
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            sess = session(
-                output_dir=tmpdir,
-                interval=2.0,
-                jpeg=False,
-                quality=75,
-                verbose=False,
-                monitor_id=3,
-                capture_all=True,
+            # Act
+            with session(output_dir=tmpdir, verbose=False) as sess:
+                running_inside = sess.worker.running
+            # Assert
+            assert running_inside is True
+
+
+class TestSessionFactoryKwargs:
+    """session() must forward every kwarg to Session.__init__."""
+
+    @pytest.fixture
+    def factory_session(self):
+        from scitex_capture.session import session
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            yield (
+                session(
+                    output_dir=tmpdir,
+                    interval=2.0,
+                    jpeg=False,
+                    quality=75,
+                    verbose=False,
+                    monitor_id=3,
+                    capture_all=True,
+                ),
+                tmpdir,
             )
 
-            assert sess.output_dir == tmpdir
-            assert sess.interval == 2.0
-            assert sess.jpeg is False
-            assert sess.quality == 75
-            assert sess.verbose is False
-            assert sess.monitor_id == 3
-            assert sess.capture_all is True
-
-    def test_session_factory_works_as_context_manager(self):
-        """Test session() result works as context manager."""
+    def test_factory_forwards_output_dir(self, factory_session):
         # Arrange
+        sess, tmpdir = factory_session
         # Act
+        value = sess.output_dir
         # Assert
-        from scitex_capture.capture import ScreenshotWorker
-        from scitex_capture.session import session
+        assert value == tmpdir
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            with patch.object(ScreenshotWorker, "_take_screenshot", return_value=None):
-                with session(output_dir=tmpdir, verbose=False) as sess:
-                    assert sess.worker is not None
-                    assert sess.worker.running is True
+    def test_factory_forwards_interval(self, factory_session):
+        # Arrange
+        sess, _ = factory_session
+        # Act
+        value = sess.interval
+        # Assert
+        assert value == 2.0
 
-                assert sess.worker.running is False
+    def test_factory_forwards_jpeg(self, factory_session):
+        # Arrange
+        sess, _ = factory_session
+        # Act
+        value = sess.jpeg
+        # Assert
+        assert value is False
+
+    def test_factory_forwards_quality(self, factory_session):
+        # Arrange
+        sess, _ = factory_session
+        # Act
+        value = sess.quality
+        # Assert
+        assert value == 75
+
+    def test_factory_forwards_monitor_id(self, factory_session):
+        # Arrange
+        sess, _ = factory_session
+        # Act
+        value = sess.monitor_id
+        # Assert
+        assert value == 3
+
+    def test_factory_forwards_capture_all(self, factory_session):
+        # Arrange
+        sess, _ = factory_session
+        # Act
+        value = sess.capture_all
+        # Assert
+        assert value is True
 
 
 class TestModuleExports:
     """Test module exports."""
 
-    def test_session_class_importable(self):
-        """Test Session class can be imported."""
+    def test_session_class_is_importable(self):
         # Arrange
         # Act
         from scitex_capture.session import Session
@@ -585,8 +543,7 @@ class TestModuleExports:
         # Assert
         assert Session is not None
 
-    def test_session_function_importable(self):
-        """Test session function can be imported."""
+    def test_session_function_is_callable(self):
         # Arrange
         # Act
         from scitex_capture.session import session
@@ -594,8 +551,7 @@ class TestModuleExports:
         # Assert
         assert callable(session)
 
-    def test_session_from_package_init(self):
-        """Test session is accessible from package init."""
+    def test_session_accessible_from_package_root(self):
         # Arrange
         # Act
         from scitex_capture import session
@@ -605,87 +561,4 @@ class TestModuleExports:
 
 
 if __name__ == "__main__":
-    import os
-
-    import pytest
-
     pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/capture/session.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-18 09:55:53 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/capture/session.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-#
-# __FILE__ = "./src/scitex/capture/session.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-#
-#
-# class Session:
-#     """Context manager for CAM session with automatic start/stop."""
-#
-#     def __init__(
-#         self,
-#         output_dir: str = "~/.scitex/capture/",
-#         interval: float = 1.0,
-#         jpeg: bool = True,
-#         quality: int = 60,
-#         on_capture=None,
-#         on_error=None,
-#         verbose: bool = True,
-#         monitor_id: int = 0,
-#         capture_all: bool = False,
-#     ):
-#         """Initialize session parameters."""
-#         self.output_dir = output_dir
-#         self.interval = interval
-#         self.jpeg = jpeg
-#         self.quality = quality
-#         self.on_capture = on_capture
-#         self.on_error = on_error
-#         self.verbose = verbose
-#         self.monitor_id = monitor_id
-#         self.capture_all = capture_all
-#         self.worker = None
-#
-#     def __enter__(self):
-#         """Start monitoring when entering context."""
-#         from .utils import start_monitor
-#
-#         self.worker = start_monitor(
-#             output_dir=self.output_dir,
-#             interval=self.interval,
-#             jpeg=self.jpeg,
-#             quality=self.quality,
-#             on_capture=self.on_capture,
-#             on_error=self.on_error,
-#             verbose=self.verbose,
-#             monitor_id=self.monitor_id,
-#             capture_all=self.capture_all,
-#         )
-#         return self
-#
-#     def __exit__(self, exc_type, exc_val, exc_tb):
-#         """Stop monitoring when exiting context."""
-#         from .utils import stop_monitor
-#
-#         stop_monitor()
-#         return False
-#
-#
-# def session(**kwargs):
-#     """Create a new session context manager."""
-#     return Session(**kwargs)
-#
-#
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/capture/session.py
-# --------------------------------------------------------------------------------
