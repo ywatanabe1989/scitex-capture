@@ -36,6 +36,7 @@ autodoc_default_options = {
 
 # Heavy/optional deps mocked so RTD can build without installing them.
 autodoc_mock_imports = ["scitex_dev", "mcp"]
+suppress_warnings = ["autosummary.duplicate"]
 
 autosummary_generate = True
 
