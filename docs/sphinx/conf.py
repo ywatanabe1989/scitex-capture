@@ -27,7 +27,7 @@ extensions = [
 ]
 
 autodoc_default_options = {
-    "members": True,
+    "members": False,
     "member-order": "bysource",
     "undoc-members": False,
     "private-members": False,
@@ -35,7 +35,8 @@ autodoc_default_options = {
 }
 
 # Heavy/optional deps mocked so RTD can build without installing them.
-autodoc_mock_imports = [""]
+autodoc_mock_imports = ["scitex_dev", "mcp"]
+suppress_warnings = ["autosummary.duplicate"]
 
 autosummary_generate = True
 

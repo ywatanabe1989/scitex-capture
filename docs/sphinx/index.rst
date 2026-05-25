@@ -1,5 +1,5 @@
 scitex-capture
-=============
+================
 
 Small linear-algebra helpers (distance, geometric median, cosine, nannorm)
 extracted from the SciTeX ecosystem as a standalone package.
