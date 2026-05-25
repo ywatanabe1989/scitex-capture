@@ -27,7 +27,7 @@ extensions = [
 ]
 
 autodoc_default_options = {
-    "members": True,
+    "members": False,
     "member-order": "bysource",
     "undoc-members": False,
     "private-members": False,
