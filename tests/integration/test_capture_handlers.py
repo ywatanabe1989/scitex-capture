@@ -10,24 +10,18 @@ class TestCaptureScreenshotHandler:
     @pytest.mark.asyncio
     async def test_capture_screenshot_returns_dict_result_is_dict(self):
         # Arrange
-        # Arrange
         from scitex_capture._mcp.handlers import capture_screenshot_handler
         # Act
         result = await capture_screenshot_handler(return_base64=False)
-        # Act
-        # Assert
         # Assert
         assert isinstance(result, dict)
 
     @pytest.mark.asyncio
     async def test_capture_screenshot_returns_dict_success_in_result(self):
         # Arrange
-        # Arrange
         from scitex_capture._mcp.handlers import capture_screenshot_handler
         # Act
         result = await capture_screenshot_handler(return_base64=False)
-        # Act
-        # Assert
         # Assert
         assert "success" in result
 
@@ -35,24 +29,18 @@ class TestCaptureScreenshotHandler:
     @pytest.mark.asyncio
     async def test_capture_screenshot_with_base64_result_is_dict(self):
         # Arrange
-        # Arrange
         from scitex_capture._mcp.handlers import capture_screenshot_handler
         # Act
         result = await capture_screenshot_handler(return_base64=True)
-        # Act
-        # Assert
         # Assert
         assert isinstance(result, dict)
 
     @pytest.mark.asyncio
     async def test_capture_screenshot_with_base64_success_in_result(self):
         # Arrange
-        # Arrange
         from scitex_capture._mcp.handlers import capture_screenshot_handler
         # Act
         result = await capture_screenshot_handler(return_base64=True)
-        # Act
-        # Assert
         # Assert
         assert "success" in result
 
@@ -64,24 +52,18 @@ class TestMonitoringHandlers:
     @pytest.mark.asyncio
     async def test_get_monitoring_status_result_is_dict(self):
         # Arrange
-        # Arrange
         from scitex_capture._mcp.handlers import get_monitoring_status_handler
         # Act
         result = await get_monitoring_status_handler()
-        # Act
-        # Assert
         # Assert
         assert isinstance(result, dict)
 
     @pytest.mark.asyncio
     async def test_get_monitoring_status_success_in_result(self):
         # Arrange
-        # Arrange
         from scitex_capture._mcp.handlers import get_monitoring_status_handler
         # Act
         result = await get_monitoring_status_handler()
-        # Act
-        # Assert
         # Assert
         assert "success" in result
 
@@ -104,24 +86,18 @@ class TestListRecentScreenshotsHandler:
     @pytest.mark.asyncio
     async def test_list_recent_screenshots_default_result_is_dict(self):
         # Arrange
-        # Arrange
         from scitex_capture._mcp.handlers import list_recent_screenshots_handler
         # Act
         result = await list_recent_screenshots_handler()
-        # Act
-        # Assert
         # Assert
         assert isinstance(result, dict)
 
     @pytest.mark.asyncio
     async def test_list_recent_screenshots_default_success_in_result(self):
         # Arrange
-        # Arrange
         from scitex_capture._mcp.handlers import list_recent_screenshots_handler
         # Act
         result = await list_recent_screenshots_handler()
-        # Act
-        # Assert
         # Assert
         assert "success" in result
 
@@ -129,24 +105,18 @@ class TestListRecentScreenshotsHandler:
     @pytest.mark.asyncio
     async def test_list_recent_screenshots_with_limit_result_is_dict(self):
         # Arrange
-        # Arrange
         from scitex_capture._mcp.handlers import list_recent_screenshots_handler
         # Act
         result = await list_recent_screenshots_handler(limit=5)
-        # Act
-        # Assert
         # Assert
         assert isinstance(result, dict)
 
     @pytest.mark.asyncio
     async def test_list_recent_screenshots_with_limit_success_in_result(self):
         # Arrange
-        # Arrange
         from scitex_capture._mcp.handlers import list_recent_screenshots_handler
         # Act
         result = await list_recent_screenshots_handler(limit=5)
-        # Act
-        # Assert
         # Assert
         assert "success" in result
 
@@ -158,24 +128,18 @@ class TestListSessionsHandler:
     @pytest.mark.asyncio
     async def test_list_sessions_result_is_dict(self):
         # Arrange
-        # Arrange
         from scitex_capture._mcp.handlers import list_sessions_handler
         # Act
         result = await list_sessions_handler(limit=10)
-        # Act
-        # Assert
         # Assert
         assert isinstance(result, dict)
 
     @pytest.mark.asyncio
     async def test_list_sessions_success_in_result(self):
         # Arrange
-        # Arrange
         from scitex_capture._mcp.handlers import list_sessions_handler
         # Act
         result = await list_sessions_handler(limit=10)
-        # Act
-        # Assert
         # Assert
         assert "success" in result
 
@@ -187,24 +151,18 @@ class TestGetInfoHandler:
     @pytest.mark.asyncio
     async def test_get_info_result_is_dict(self):
         # Arrange
-        # Arrange
         from scitex_capture._mcp.handlers import get_info_handler
         # Act
         result = await get_info_handler()
-        # Act
-        # Assert
         # Assert
         assert isinstance(result, dict)
 
     @pytest.mark.asyncio
     async def test_get_info_success_in_result(self):
         # Arrange
-        # Arrange
         from scitex_capture._mcp.handlers import get_info_handler
         # Act
         result = await get_info_handler()
-        # Act
-        # Assert
         # Assert
         assert "success" in result
 
