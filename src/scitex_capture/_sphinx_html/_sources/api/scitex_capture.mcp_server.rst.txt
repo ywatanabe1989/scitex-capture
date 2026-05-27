@@ -1,0 +1,19 @@
+scitex\_capture.mcp\_server
+===========================
+
+.. automodule:: scitex_capture.mcp_server
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_capture_dir
+      main
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      CaptureServer
+   

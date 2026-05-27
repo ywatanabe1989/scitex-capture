@@ -1,8 +1,10 @@
 scitex-capture
-=============
+================
 
-Small linear-algebra helpers (distance, geometric median, cosine, nannorm)
-extracted from the SciTeX ecosystem as a standalone package.
+Session-based screen capture — single screenshots, multi-frame sessions
+→ animated GIFs, grid overlays, and monitor introspection. Optimised for
+WSL→Windows host and for AI agents that need a "what does my screen look
+like right now" tool.
 
 .. toctree::
    :maxdepth: 2
