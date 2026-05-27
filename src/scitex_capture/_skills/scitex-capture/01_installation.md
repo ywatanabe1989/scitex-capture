@@ -20,9 +20,9 @@ Pulls `mss` (multi-monitor screen grab), `Pillow` (JPEG encoding), and `click`
 
 ```bash
 scitex-capture --version
-scitex-capture info                          # detected monitors + JPEG settings
+scitex-capture show-info                    # detected monitors + JPEG settings
 python -c "import scitex_capture; print(scitex_capture.__version__)"
-python -c "from scitex_capture import capture; capture(monitor=0, output_path='/tmp/test.jpg')"
+python -c "from scitex_capture import snap; snap('test', output_path='/tmp/test.jpg')"
 ```
 
 ## Editable install (development)

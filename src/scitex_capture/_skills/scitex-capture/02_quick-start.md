@@ -10,41 +10,42 @@ tags: [scitex-capture-quick-start]
 ## Single screenshot
 
 ```python
-from scitex_capture import capture
+from scitex_capture import snap
 
-path = capture(monitor=0, output_path="/tmp/screen.jpg")
+path = snap("debug message")
 print(path)
-```
 
-`monitor=0` is the primary display; `monitor=-1` means "all monitors".
+# All monitors, custom quality
+path = snap(capture_all=True, quality=85)
+```
 
 ## Continuous monitor loop
 
 ```python
-from scitex_capture import start_monitor, stop_monitor
+from scitex_capture import start, stop
 
-start_monitor(interval=10, duration=300)     # snapshot every 10s for 5 min
+start(interval=10)        # snapshot every 10s
 # ... do work ...
-stop_monitor()
+stop()
 ```
 
-Frames land under `$SCITEX_DIR/capture/<session>/`.
+Frames land under `$SCITEX_DIR/capture/runtime/screenshots/`.
 
 ## Animated GIF
 
 ```python
 from scitex_capture import gif
 
-gif("/tmp/capture/session_xyz", output="/tmp/timelapse.gif", fps=4)
+path = gif()  # GIF from the latest monitoring session
 ```
 
 ## CLI
 
 ```bash
-scitex-capture info
-scitex-capture monitor start --interval 10 --monitor 0
-scitex-capture monitor stop
-scitex-capture gif
+scitex-capture show-info
+scitex-capture start-monitor --interval 10
+scitex-capture stop-monitor
+scitex-capture make-gif
 ```
 
 ## Next
