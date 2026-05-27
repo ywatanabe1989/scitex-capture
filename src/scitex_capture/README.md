@@ -204,34 +204,34 @@ The module can also be used from command line:
 
 ```bash
 # Take screenshot with message
-python -m scitex.capture "my_message"
+python -m scitex_capture "my_message"
 
 # Take screenshot (no message)
-python -m scitex.capture
+python -m scitex_capture
 
 # Capture all monitors
-python -m scitex.capture --all "all_screens"
+python -m scitex_capture --all "all_screens"
 
 # Capture specific app
-python -m scitex.capture --app chrome "browser_state"
+python -m scitex_capture --app chrome "browser_state"
 
-# Start monitoring
-python -m scitex.capture --start
+# Start monitoring (interactive, requires --yes)
+python -m scitex_capture start-monitor --interval 2 --yes
 
 # Stop monitoring
-python -m scitex.capture --stop
+python -m scitex_capture stop-monitor --yes
 
 # Create GIF from latest session
-python -m scitex.capture --gif
-
-# Start MCP server
-python -m scitex.capture --mcp
-
-# List windows
-python -m scitex.capture --list
+python -m scitex_capture make-gif
 
 # Show display info
-python -m scitex.capture --info
+python -m scitex_capture show-info
+
+# Start MCP server
+python -m scitex_capture mcp start --yes
+
+# List windows
+python -m scitex_capture list-windows
 ```
 
 ## API Reference
@@ -282,8 +282,8 @@ Located in `powershell/` directory:
 
 ## See Also
 
-- Configuration: `config/capture.yaml`
-- Examples: `examples/capture_examples/`
-- MCP Server: `src/scitex/capture/mcp_server.py`
+- [README.md](../../README.md) — standalone package docs
+- Examples: `examples/quickstart.py`
+- Configuration: `$SCITEX_DIR/capture/config.yaml`
 
 EOF

@@ -31,15 +31,22 @@
 scitex-capture/
 ├── src/scitex_capture/
 │   ├── __init__.py              # snap, start, stop, gif, get_info
-│   ├── _snap.py                 # one-shot screenshot (mss + Pillow)
-│   ├── _session.py              # interval capture session manager
-│   ├── _gif.py                  # multi-frame -> animated GIF / grid
-│   ├── _info.py                 # monitor + cursor introspection
-│   ├── _wsl.py                  # WSL -> Windows host bridge
-│   ├── _cli/                    # scitex-capture entrypoint
-│   ├── _mcp_tools/              # MCP server (opt-in)
-│   └── playwright/              # browser-side capture (opt-in)
-└── tests/                       # 146/146 pass
+│   ├── capture.py               # ScreenshotWorker, CaptureManager
+│   ├── cli.py                   # scitex-capture CLI (Click)
+│   ├── gif.py                   # GIF creation (GifCreator)
+│   ├── grid.py                  # Grid overlay utilities
+│   ├── session.py               # Session context manager
+│   ├── utils.py                 # capture(), start_monitor(), stop_monitor()
+│   ├── _paths.py                # Canonical filesystem layout
+│   ├── _mcp/                    # MCP handlers & tool schemas
+│   ├── mcp_server.py            # Standalone MCP server (deprecated)
+│   └── powershell/              # Windows host capture scripts
+├── docs/
+│   ├── sphinx/                  # API docs (Read the Docs)
+│   └── *.png                    # Logo assets
+├── tests/                       # 252 tests pass (zero mocks)
+└── examples/
+    └── quickstart.py
 ```
 
 ## Installation
@@ -69,13 +76,17 @@ path = cap.snap(capture_all=True)
 info = cap.get_info()
 
 # Continuous session capture
-session_id = cap.start(interval=2)
+cap.start(interval=2)
 # ... do work ...
-cap.stop(session_id)
-gif_path = cap.gif(session_id)
+cap.stop()
 
-# Latest session
-gif = cap.create_gif_from_latest_session()
+# GIF from latest session
+gif_path = cap.gif()
+
+# Or from a specific session directory
+cap.create_gif_from_files(paths, "output.gif")
+cap.create_gif_from_pattern("frames_*.jpg")
+cap.create_gif_from_session("20250823_104523")
 ```
 
 </details>
@@ -87,10 +98,15 @@ gif = cap.create_gif_from_latest_session()
 
 ```bash
 scitex-capture --help
-scitex-capture snap "debug message"
-scitex-capture start --interval 2
-scitex-capture stop <session-id>
-scitex-capture gif <session-id>
+scitex-capture "debug message"              # snap with a message
+scitex-capture --all                         # all monitors
+scitex-capture --app chrome                  # capture a specific app
+scitex-capture show-info                     # monitors, windows, desktops
+scitex-capture start-monitor --interval 2    # continuous capture loop
+scitex-capture stop-monitor                  # stop the loop
+scitex-capture make-gif                      # GIF from latest session
+scitex-capture list-windows                  # visible OS windows
+scitex-capture mcp start                     # MCP server (for AI agents)
 ```
 
 </details>
@@ -107,18 +123,19 @@ sequenceDiagram
     loop every 2s
         C->>M: grab frame
         M-->>C: PNG bytes
-        C->>F: write frame_NNN.png
+        C->>F: write frame_NNN.jpg
     end
-    U->>C: cap.stop(session_id)
-    U->>C: cap.gif(session_id)
+    U->>C: cap.stop()
+    U->>C: cap.gif()
     C-->>F: session.gif (animated)
 ```
 
 ## Status
 
-Standalone fork of `scitex.capture`. Only deps are Pillow + mss (with
+Standalone fork of `scitex.capture`. Core deps: Pillow + mss + click (with
 playwright + mcp as opt-ins). The umbrella package's `scitex.capture`
-import path is preserved via a `sys.modules`-alias bridge. 146/146 tests pass.
+import path is preserved via a `sys.modules`-alias bridge. All 252 tests pass
+with zero mocks.
 
 ## Part of SciTeX
 
